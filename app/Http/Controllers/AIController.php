@@ -174,7 +174,7 @@ class AIController extends Controller
 
             return $this->sendReply(
                 $user,
-                "Hai {$namaPengguna}! Ada informasi obat, aturan pakai, atau ketersediaan stok yang bisa aku bantu di apotek hari ini? 😊"
+                "Hai {$namaPengguna}! 👋 Saya **PharmAI** dari **APOTEK ITU TOKO OBAT**. Ada informasi obat, aturan pakai, atau ketersediaan stok yang bisa aku bantu hari ini? 😊"
             );
         }
     }
@@ -1138,8 +1138,8 @@ class AIController extends Controller
                 return "{$item['nama_obat']} [Stok: {$item['stok']} {$item['satuan']}]";
             })->implode(', ');
 
-            $systemInstruction = "Kamu adalah Asisten Virtual Apotek dan Konsultan Medis Farmasi Klinis yang profesional, ramah, dan sangat empatik. Pengguna bernama {$namaUser}.\n\n"
-                . "DAFTAR SEBAGIAN OBAT RIIL DI APOTEK KAMI: [{$sampleObat}].\n\n"
+            $systemInstruction = "Kamu adalah PharmAI, Asisten Virtual Pintar dari APOTEK ITU TOKO OBAT dan Konsultan Medis Farmasi Klinis yang profesional, ramah, dan sangat empatik. Pengguna bernama {$namaUser}.\n\n"
+                . "DAFTAR SEBAGIAN OBAT RIIL DI APOTEK ITU TOKO OBAT: [{$sampleObat}].\n\n"
                 . "PANDUAN MEDIS & KLINIS:\n"
                 . "1. Tanggapi setiap keluhan fisik, rasa sakit, luka (luka bakar, sobek, lebam, tusuk, lecet, mimisan), dan pertanyaan lanjutan (seperti waktu recovery/pemulihan, cara kompres, aturan pakai) dengan empati mendalam dan pemahaman medis yang akurat.\n"
                 . "2. PAHAMI KONTEKS PERCAKAPAN SEBELUMNYA! Jika pengguna menanyakan 'kira-kira berapa lama waktu recoverynya?', kaitkan secara cerdas dengan topik luka/kondisi yang baru saja dibahas sebelumnya.\n"
@@ -1214,7 +1214,7 @@ class AIController extends Controller
             $response = Http::timeout(4)->post($url, [
                 'model' => $model,
                 'messages' => [
-                    ['role' => 'system', 'content' => "Kamu adalah Konsultan Medis & Farmasi Apotek yang ramah dan solutif. Pengguna bernama {$namaUser}. Berikan saran medis P3K yang tepat dan aman."],
+                    ['role' => 'system', 'content' => "Kamu adalah PharmAI, Konsultan Medis & Farmasi dari APOTEK ITU TOKO OBAT yang ramah dan solutif. Pengguna bernama {$namaUser}. Berikan saran medis P3K yang tepat dan aman."],
                     ['role' => 'user', 'content' => $teks]
                 ],
                 'stream' => false,
@@ -1235,7 +1235,7 @@ class AIController extends Controller
             return $this->getGeneralHealthGuidanceText($teks, $namaUser, $obat, $riwayat);
         }
 
-        return "Hai {$namaUser}! Ada informasi obat, aturan pakai, atau ketersediaan stok yang bisa aku bantu di apotek hari ini? 😊";
+        return "Hai {$namaUser}! 👋 Saya **PharmAI** dari **APOTEK ITU TOKO OBAT**. Ada informasi obat, aturan pakai, atau ketersediaan stok yang bisa aku bantu hari ini? 😊";
     }
 
     /*
@@ -1291,7 +1291,13 @@ class AIController extends Controller
     private function handleSmallTalk(string $teks): ?string
     {
         if (preg_match('/^(halo|hai|hi|hey|pagi|selamat pagi|selamat siang|selamat sore|selamat malam)[!. ]*$/u', $teks)) {
-            return 'Hai! 😊 Ada yang bisa aku bantu seputar informasi apotek atau obat hari ini?';
+            return 'Hai! 😊 Saya **PharmAI** dari **APOTEK ITU TOKO OBAT**. Ada yang bisa aku bantu seputar informasi obat, keluhan kesehatan, atau stok hari ini?';
+        }
+        if (preg_match('/(?:siapa\s+nama\s*(?:mu|kamu)|nama\s*(?:mu|kamu)\s+siapa|kamu\s+siapa|siapa\s+kamu)/u', $teks)) {
+            return 'Halo! 👋 Aku **PharmAI**, asisten virtual pintar dari **APOTEK ITU TOKO OBAT** yang siap membantu konsultasi keluhan kesehatan, informasi obat, dan pengecekan stok apotek.';
+        }
+        if (preg_match('/(?:nama\s+apotek|apotek\s+apa\s+ini)/u', $teks)) {
+            return 'Ini adalah **APOTEK ITU TOKO OBAT**, dan aku **PharmAI** yang siap membantu kamu! 😊';
         }
         if (preg_match('/^(makasih|terima kasih|thanks|thank you)[!. ]*$/u', $teks)) {
             return 'Sama-sama! 😊 Semoga lekas sehat dan harimu menyenangkan.';
@@ -1435,7 +1441,7 @@ class AIController extends Controller
         }
 
         return "Aduh, semoga lekas membaik ya, {$namaUser}. ❤️\n\n"
-            . "Sebagai asisten apotek, aku memahami keluhan kesehatan atau pertanyaan yang sedang kamu rasakan.\n\n"
+            . "Sebagai **PharmAI** dari **APOTEK ITU TOKO OBAT**, aku memahami keluhan kesehatan atau pertanyaan yang sedang kamu rasakan.\n\n"
             . "📋 **Langkah Perawatan Mandiri & Pertolongan Pertama (P3K):**\n"
             . "1️⃣ **Istirahat yang Cukup:** Beri tubuh waktu beristirahat di ruangan yang sejuk, tenang, dan bersirkulasi udara baik.\n"
             . "2️⃣ **Cukupi Kebutuhan Cairan:** Minum air putih hangat sedikit demi sedikit secara teratur untuk menjaga hidrasi tubuh.\n"

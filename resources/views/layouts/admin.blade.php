@@ -4,30 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - Admin Panel</title>
+    <title>@yield('title', 'Dashboard') - APOTEK ITU TOKO OBAT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/admin/shared.css') }}">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            /* Palette from https://coolors.co/palette/03045e-023e8a-0077b6-0096c7-00b4d8-48cae4-90e0ef-ade8f4-caf0f8 */
-            --dark: #03045e;
-            --primary-dark: #023e8a;
-            --primary: #0077b6;
-            --primary-medium: #0096c7;
-            --primary-light: #00b4d8;
-            --accent-1: #48cae4;
-            --accent-2: #90e0ef;
-            --accent-3: #ade8f4;
-            --accent-4: #caf0f8;
+            /* Opsi B: Emerald Pharmacy Green & Slate Palette */
+            --dark: #022c22;
+            --primary-dark: #065f46;
+            --primary: #059669;
+            --primary-medium: #10b981;
+            --primary-light: #34d399;
+            --accent-1: #6ee7b7;
+            --accent-2: #a7f3d0;
+            --accent-3: #d1fae5;
+            --accent-4: #ecfdf5;
             --success: #10b981;
             --success-light: #dcfce7;
-            --success-dark: #166534;
+            --success-dark: #065f46;
             --warning: #f59e0b;
             --warning-light: #fef3c7;
             --warning-dark: #92400e;
@@ -35,38 +35,39 @@
             --danger-light: #fee2e2;
             --danger-dark: #991b1b;
 
-            --sidebar-width: 240px;
+            --sidebar-width: 248px;
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
             --gray-300: #cbd5e1;
             --gray-400: #94a3b8;
-            --gray-500: #505c6e;
+            --gray-500: #64748b;
             --gray-600: #475569;
             --gray-700: #334155;
             --gray-800: #1e293b;
             --white: #ffffff;
-            --radius: 12px;
-            --radius-sm: 8px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08);
-            --transition: all 0.2s ease;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 2px 6px rgba(2, 44, 34, 0.05);
+            --shadow-md: 0 10px 20px -5px rgba(5, 150, 105, 0.1), 0 4px 6px -2px rgba(2, 44, 34, 0.04);
+            --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--gray-100);
+            font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+            background: #f4f8f6;
             color: var(--gray-800);
             line-height: 1.6;
             display: flex;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--dark);
-            color: var(--gray-400);
+            background: linear-gradient(180deg, #022c22 0%, #064e3b 58%, #065f46 100%);
+            color: rgba(255, 255, 255, 0.7);
             position: fixed;
             top: 0;
             left: 0;
@@ -75,24 +76,36 @@
             flex-direction: column;
             z-index: 50;
             overflow-y: auto;
+            box-shadow: 4px 0 25px rgba(2, 44, 34, 0.15);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .sidebar-header {
-            padding: 1.25rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 1.25rem 1.15rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .sidebar-brand {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.65rem;
             text-decoration: none;
             color: var(--white);
-            font-weight: 700;
-            font-size: 1.1rem;
+            font-weight: 800;
+            font-size: 0.92rem;
+            line-height: 1.22;
+            letter-spacing: -0.01em;
         }
 
-        .sidebar-brand i { color: var(--primary); font-size: 1.3rem; }
+        .sidebar-brand i {
+            background: linear-gradient(135deg, #34d399 0%, #a7f3d0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.45rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.4));
+        }
 
         .sidebar-nav {
             flex: 1;
@@ -102,41 +115,56 @@
         .sidebar-label {
             font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--gray-400);
-            padding: 0.75rem 0.75rem 0.35rem;
-            font-weight: 600;
+            letter-spacing: 0.11em;
+            color: rgba(255, 255, 255, 0.55);
+            padding: 0.85rem 0.75rem 0.35rem;
+            font-weight: 700;
         }
 
         .sidebar-link {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.6rem 0.75rem;
+            padding: 0.62rem 0.8rem;
             text-decoration: none;
-            color: var(--gray-400);
+            color: rgba(255, 255, 255, 0.74);
             border-radius: var(--radius-sm);
-            font-size: 0.85rem;
+            font-size: 0.86rem;
             font-weight: 500;
             transition: var(--transition);
-            margin-bottom: 2px;
+            margin-bottom: 3px;
+            position: relative;
         }
 
         .sidebar-link:hover {
-            background: rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.08);
             color: var(--white);
+            transform: translateX(3px);
         }
 
         .sidebar-link.active {
-            background: var(--primary);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
             color: var(--white);
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.36);
         }
 
-        .sidebar-link i { width: 20px; text-align: center; font-size: 0.9rem; }
+        .sidebar-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 22%;
+            height: 56%;
+            width: 4px;
+            background: #a7f3d0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .sidebar-link i { width: 20px; text-align: center; font-size: 0.95rem; }
 
         .sidebar-footer {
             padding: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            border-top: 1px solid rgba(255,255,255,0.08);
         }
 
         /* ===== MAIN AREA ===== */
@@ -144,25 +172,31 @@
             margin-left: var(--sidebar-width);
             flex: 1;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .admin-topbar {
-            background: var(--white);
-            border-bottom: 1px solid var(--gray-200);
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.85);
             padding: 0 2rem;
-            height: 60px;
+            height: 66px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 40;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
         }
 
         .admin-topbar h1 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gray-800);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+            letter-spacing: -0.02em;
         }
 
         .admin-topbar-actions {
@@ -281,8 +315,11 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-                <i class="fas fa-capsules"></i>
-                <span class="sidebar-brand-text">Admin Panel</span>
+                <i class="fas fa-mortar-pestle"></i>
+                <span class="sidebar-brand-text">
+                    APOTEK ITU TOKO OBAT
+                    <small style="display:block;font-size:0.62rem;font-weight:600;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;">Admin Panel</small>
+                </span>
             </a>
         </div>
 

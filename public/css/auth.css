@@ -1,11 +1,12 @@
-/* ===== APOTEK SULTHAN ELIDAS - AUTHENTICATION SCREEN SHARING STYLES ===== */
+/* ===== APOTEK ITU TOKO OBAT - EMERALD PHARMACY GREEN & SLATE AUTH STYLES ===== */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --primary: #0077b6;
-    --primary-dark: #03045e;
-    --primary-light: #00b4d8;
+    --primary: #059669;
+    --primary-dark: #022c22;
+    --primary-light: #10b981;
+    --teal: #047857;
     --gray-100: #f1f5f9;
     --gray-200: #e2e8f0;
     --gray-300: #cbd5e1;
@@ -21,7 +22,7 @@ html {
 
 body {
     font-family: 'Outfit', sans-serif;
-    background: radial-gradient(circle at 10% 20%, rgba(3, 4, 94, 0.95) 0%, rgba(2, 62, 138, 0.95) 40%, rgba(11, 15, 25, 1) 100%);
+    background: radial-gradient(circle at 15% 20%, #022c22 0%, #064e3b 52%, #065f46 100%);
     background-attachment: fixed;
     min-height: 100vh;
     display: flex;
@@ -35,15 +36,15 @@ body {
 /* Ambient glowing background blobs */
 .bg-blob {
     position: fixed;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(0, 180, 216, 0.15) 0%, transparent 70%);
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
     border-radius: 50%;
     z-index: 0;
     pointer-events: none;
 }
-.blob-1 { top: -100px; left: -100px; }
-.blob-2 { bottom: -100px; right: -100px; }
+.blob-1 { top: -120px; left: -120px; }
+.blob-2 { bottom: -120px; right: -120px; background: radial-gradient(circle, rgba(52, 211, 153, 0.22) 0%, transparent 70%); }
 
 .login-container, .register-container {
     width: 100%;
@@ -55,50 +56,50 @@ body {
 
 .login-brand, .register-brand {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.85rem;
 }
 .register-brand {
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.65rem;
 }
 
 .login-brand-icon, .register-brand-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
-    border-radius: 16px;
+    width: 62px;
+    height: 62px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 1.6rem;
     color: white;
     margin-bottom: 0.75rem;
-    box-shadow: 0 8px 24px rgba(0, 180, 216, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     animation: pulse-glow 3s infinite;
 }
 .register-brand-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 14px;
-    font-size: 1.5rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    font-size: 1.45rem;
 }
 
 @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 8px 24px rgba(0, 180, 216, 0.35); transform: translateY(0); }
-    50% { box-shadow: 0 8px 36px rgba(0, 180, 216, 0.55); transform: translateY(-2px); }
+    0%, 100% { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.32); transform: translateY(0); }
+    50% { box-shadow: 0 12px 36px rgba(5, 150, 105, 0.55); transform: translateY(-2px); }
 }
 
 .login-brand h1, .register-brand h1 {
     font-size: 1.45rem;
     font-weight: 800;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
     color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
     text-transform: uppercase;
 }
 
 .login-brand h1 span, .register-brand h1 span {
-    background: linear-gradient(135deg, #00b4d8 0%, #ade8f4 100%);
+    background: linear-gradient(135deg, #34d399 0%, #a7f3d0 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -106,20 +107,20 @@ body {
 
 .login-brand p, .register-brand p {
     font-size: 0.82rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(240, 253, 250, 0.75);
     font-weight: 500;
-    margin-top: 0.25rem;
-    letter-spacing: 0.03em;
+    margin-top: 0.3rem;
+    letter-spacing: 0.02em;
 }
 
 .login-card, .register-card {
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: var(--radius);
     padding: 2.25rem 2.5rem;
-    box-shadow: 0 25px 60px -15px rgba(3, 4, 94, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.6);
 }
 .register-card {
     padding: 2rem 2.25rem;
@@ -194,7 +195,7 @@ body {
     outline: none;
     border-color: var(--primary);
     background: white;
-    box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.15);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.16);
 }
 
 .form-control:focus + i {
@@ -221,8 +222,8 @@ body {
 
 .btn-login, .btn-register {
     width: 100%;
-    padding: 0.8rem;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 0.82rem;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -235,7 +236,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(2, 62, 138, 0.2);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.28);
 }
 .btn-register {
     padding: 0.75rem;
@@ -244,9 +245,9 @@ body {
 }
 
 .btn-login:hover, .btn-register:hover {
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(2, 62, 138, 0.3);
+    box-shadow: 0 8px 22px rgba(5, 150, 105, 0.36);
 }
 
 .btn-login:active, .btn-register:active {

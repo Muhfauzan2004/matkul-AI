@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - Panel Pemilik</title>
+    <title>@yield('title', 'Dashboard') - APOTEK ITU TOKO OBAT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -17,8 +17,11 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <a href="{{ route('pemilik.dashboard') }}" class="sidebar-brand">
-                <i class="fas fa-crown"></i>
-                <span class="sidebar-brand-text">Panel Pemilik</span>
+                <i class="fas fa-mortar-pestle"></i>
+                <span class="sidebar-brand-text">
+                    APOTEK ITU TOKO OBAT
+                    <small style="display:block;font-size:0.62rem;font-weight:600;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;">Panel Pemilik</small>
+                </span>
             </a>
         </div>
         <nav class="sidebar-nav">

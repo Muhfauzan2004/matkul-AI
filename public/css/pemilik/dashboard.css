@@ -1,13 +1,14 @@
 /* ===== SHARED DASHBOARD STYLES ===== */
 
 .dashboard-greeting {
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 50%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #022c22 0%, #065f46 52%, #059669 100%);
     border-radius: var(--radius);
-    padding: 1.75rem 2rem;
+    padding: 1.85rem 2.1rem;
     color: white;
     margin-bottom: 1.5rem;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 12px 28px -8px rgba(5, 150, 105, 0.3);
 }
 .dashboard-greeting::before {
     content: '';

@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>AI Assistant - Apotek</title>
+    <title>PharmAI - APOTEK ITU TOKO OBAT</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
@@ -15,8 +16,8 @@
 
        body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Outfit', Arial, sans-serif;
+            background: #f4f7fb;
             height: 100vh;
             height: 100dvh;
             display: flex;
@@ -25,13 +26,14 @@
         }
 
         .header {
-            background: #0077b6;
+            background: linear-gradient(135deg, #022c22 0%, #065f46 55%, #059669 100%);
             color: white;
-            padding: 16px 22px;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             gap: 15px;
             flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(2, 44, 34, 0.14);
         }
 
         .back-button {
@@ -83,7 +85,7 @@
             height: 38px;
             min-width: 38px;
             border-radius: 50%;
-            background: #0077b6;
+            background: #059669;
             color: white;
             display: flex;
             align-items: center;
@@ -110,13 +112,14 @@
         }
 
         .bot .bubble {
-            background: #e0f2fe;
-            color: #164e63;
+            background: #ecfdf5;
+            color: #064e3b;
+            border: 1px solid #d1fae5;
             text-align: left;
         }
 
         .user .bubble {
-            background: #0077b6;
+            background: linear-gradient(135deg, #059669, #10b981);
             color: white;
             text-align: left;
         }
@@ -148,7 +151,7 @@
 
         .chat-form button {
             border: none;
-            background: #0077b6;
+            background: #059669;
             color: white;
             padding: 0 22px;
             border-radius: 10px;
@@ -191,7 +194,7 @@
         display: inline-block;
         width: 6px;
         height: 1em;
-        background: #0077b6;
+        background: #059669;
         margin-left: 3px;
         vertical-align: text-bottom;
         border-radius: 2px;
@@ -212,8 +215,8 @@
         </a>
 
         <div class="header-info">
-            <h2>AI Assistant Apotek</h2>
-            <p>Asisten informasi kesehatan</p>
+            <h2>PharmAI</h2>
+            <p>Asisten Pintar &bull; APOTEK ITU TOKO OBAT</p>
         </div>
     </header>
 
@@ -324,7 +327,7 @@
                     });
                 } else {
                     addMessage(
-                        'Halo! Saya AI Assistant Apotek. Ada yang bisa saya bantu?',
+                        'Halo! Saya **PharmAI**, asisten pintar **APOTEK ITU TOKO OBAT**. Ada yang bisa saya bantu?',
                         'bot'
                     );
                 }

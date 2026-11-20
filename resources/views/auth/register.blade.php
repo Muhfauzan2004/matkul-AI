@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - APOTEK SULTHAN ELIDAS</title>
+    <title>Daftar - APOTEK ITU TOKO OBAT</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
@@ -15,9 +15,10 @@
     <div class="register-container">
         <div class="register-brand">
             <div class="register-brand-icon">
-                <i class="fas fa-capsules"></i>
+                <i class="fas fa-mortar-pestle"></i>
             </div>
-            <h1>Apotek <span>Sulthan Elidas</span></h1>
+            <h1>APOTEK ITU <span>TOKO OBAT</span></h1>
+            <p>Registrasi Staf & Operasional Farmasi</p>
         </div>
 
         <div class="register-card">

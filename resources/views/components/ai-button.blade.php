@@ -1,5 +1,5 @@
 {{-- FLOATING BUTTON TRIGGER (POJOK KANAN BAWAH) --}}
-<button type="button" class="ai-floating-button" id="aiFloatingBtn" onclick="toggleAiDrawer()" title="Buka AI Assistant Apotek">
+<button type="button" class="ai-floating-button" id="aiFloatingBtn" onclick="toggleAiDrawer()" title="Buka PharmAI - APOTEK ITU TOKO OBAT">
     <i class="fas fa-robot" id="aiBtnIcon"></i>
     <span class="ai-btn-pulse"></span>
 </button>
@@ -8,7 +8,7 @@
 <div class="ai-drawer-backdrop" id="aiDrawerBackdrop" onclick="toggleAiDrawer(false)"></div>
 
 {{-- RIGHT-SIDE AI DRAWER PANEL (MUNCUL DI SEBELAH KANAN DASHBOARD) --}}
-<aside class="ai-drawer" id="aiDrawer" aria-label="AI Assistant Apotek Panel">
+<aside class="ai-drawer" id="aiDrawer" aria-label="PharmAI Panel">
     <!-- Header Panel Utama -->
     <div class="ai-drawer-header">
         <div class="ai-drawer-brand">
@@ -17,8 +17,8 @@
                 <span class="ai-online-dot"></span>
             </div>
             <div class="ai-drawer-title">
-                <h4 id="aiHeaderTitle">AI Assistant Apotek</h4>
-                <span><i class="fas fa-check-circle" style="color: #4ade80; font-size: 0.65rem;"></i> Konsultan Medis & Stok</span>
+                <h4 id="aiHeaderTitle">PharmAI</h4>
+                <span><i class="fas fa-check-circle" style="color: #4ade80; font-size: 0.65rem;"></i> Asisten Pintar &bull; APOTEK ITU TOKO OBAT</span>
             </div>
         </div>
         <div class="ai-drawer-actions">
@@ -74,9 +74,6 @@
             <button type="button" class="ai-history-back-btn" onclick="toggleHistoryView(false)">
                 <i class="fas fa-arrow-left"></i> Kembali ke Chat
             </button>
-            <button type="button" class="ai-history-clear-btn" onclick="confirmClearHistory()" title="Bersihkan Riwayat Chat">
-                <i class="fas fa-trash-alt"></i> Hapus Riwayat
-            </button>
         </div>
 
         <!-- Tombol Chat Baru -->
@@ -116,7 +113,7 @@
         width: 58px;
         height: 58px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #0077b6, #00b4d8);
+        background: linear-gradient(135deg, #059669, #10b981);
         color: #ffffff;
         display: flex;
         align-items: center;
@@ -124,7 +121,7 @@
         font-size: 24px;
         border: none;
         cursor: pointer;
-        box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4);
+        box-shadow: 0 6px 22px rgba(5, 150, 105, 0.44);
         z-index: 1030;
         opacity: 1;
         visibility: visible;
@@ -139,7 +136,7 @@
 
     .ai-floating-button:hover {
         transform: translateY(-4px) scale(1.08);
-        box-shadow: 0 10px 28px rgba(0, 119, 182, 0.55);
+        box-shadow: 0 10px 28px rgba(5, 150, 105, 0.58);
     }
 
     .ai-floating-button:active {
@@ -340,7 +337,7 @@
 
     /* ===== HEADER ===== */
     .ai-drawer-header {
-        background: linear-gradient(135deg, #023e8a, #0077b6);
+        background: linear-gradient(135deg, #022c22 0%, #065f46 55%, #059669 100%);
         color: #ffffff;
         padding: 14px 18px;
         display: flex;
@@ -365,7 +362,7 @@
         align-items: center;
         justify-content: center;
         font-size: 1.15rem;
-        color: #ade8f4;
+        color: #a7f3d0;
     }
 
     .ai-online-dot {
@@ -376,7 +373,7 @@
         height: 10px;
         border-radius: 50%;
         background: #4ade80;
-        border: 2px solid #0077b6;
+        border: 2px solid #065f46;
     }
 
     .ai-drawer-title h4 {
@@ -389,7 +386,7 @@
 
     .ai-drawer-title span {
         font-size: 0.72rem;
-        color: #caf0f8;
+        color: #d1fae5;
         display: flex;
         align-items: center;
         gap: 4px;
@@ -487,7 +484,7 @@
         width: 30px;
         height: 30px;
         border-radius: 8px;
-        background: #0077b6;
+        background: #059669;
         color: #ffffff;
         display: flex;
         align-items: center;
@@ -507,7 +504,7 @@
     }
 
     .ai-msg.user .ai-bubble {
-        background: linear-gradient(135deg, #0077b6, #0096c7);
+        background: linear-gradient(135deg, #059669, #10b981);
         color: #ffffff;
         border-bottom-right-radius: 3px;
     }
@@ -541,7 +538,7 @@
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: #0077b6;
+        background: #059669;
         animation: aiBlink 1.4s infinite both;
     }
 
@@ -573,8 +570,8 @@
     }
 
     .ai-input-wrap:focus-within {
-        border-color: #0077b6;
-        box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15);
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16);
         background: #ffffff;
     }
 
@@ -602,7 +599,7 @@
         width: 36px;
         height: 36px;
         border-radius: 8px;
-        background: #0077b6;
+        background: #059669;
         color: #ffffff;
         border: none;
         display: inline-flex;
@@ -615,7 +612,7 @@
     }
 
     .ai-send-btn:hover {
-        background: #023e8a;
+        background: #065f46;
         transform: scale(1.04);
     }
 
@@ -645,7 +642,7 @@
     .ai-history-back-btn {
         background: transparent;
         border: none;
-        color: #0077b6;
+        color: #059669;
         font-weight: 700;
         font-size: 0.82rem;
         cursor: pointer;
@@ -658,7 +655,7 @@
     }
 
     .ai-history-back-btn:hover {
-        background: rgba(0, 119, 182, 0.08);
+        background: rgba(5, 150, 105, 0.08);
     }
 
     .ai-history-clear-btn {
@@ -690,7 +687,7 @@
         width: 100%;
         padding: 8px 12px;
         border-radius: 8px;
-        background: linear-gradient(135deg, #0077b6, #0096c7);
+        background: linear-gradient(135deg, #059669, #10b981);
         color: #ffffff;
         border: none;
         font-size: 0.82rem;
@@ -761,8 +758,8 @@
     }
 
     .ai-history-item:hover {
-        border-color: #0077b6;
-        box-shadow: 0 3px 10px rgba(0, 119, 182, 0.1);
+        border-color: #059669;
+        box-shadow: 0 3px 10px rgba(5, 150, 105, 0.12);
         transform: translateY(-1px);
     }
 
@@ -822,7 +819,7 @@
     .ai-history-badge {
         font-size: 0.68rem;
         font-weight: 700;
-        color: #0077b6;
+        color: #059669;
         display: flex;
         align-items: center;
         gap: 4px;
@@ -861,6 +858,21 @@
         font-size: 0.82rem;
     }
 
+    .ai-search-highlight {
+        background: #fef08a;
+        color: #713f12;
+        font-weight: 700;
+        padding: 0 3px;
+        border-radius: 4px;
+        box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.35);
+    }
+
+    .ai-msg.user .ai-bubble .ai-search-highlight {
+        background: #fde047;
+        color: #022c22;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+    }
+
     .ai-history-empty i {
         font-size: 2rem;
         margin-bottom: 10px;
@@ -895,7 +907,7 @@
         display: inline-block;
         width: 6px;
         height: 1em;
-        background: #0077b6;
+        background: #059669;
         margin-left: 3px;
         vertical-align: text-bottom;
         border-radius: 2px;
@@ -954,7 +966,7 @@
             currentSessionId = createNewSessionId();
             activeSessionMessagesCount = 0;
             appendAiMessage(
-                'Halo {{ auth()->user()?->name ?? 'Admin' }}! 👋 Saya **AI Assistant Apotek**.\n\nAda keluhan kesehatan, luka, rasa sakit, aturan pakai obat, atau stok apotek yang bisa saya bantu hari ini? 😊',
+                'Halo {{ auth()->user()?->name ?? 'Admin' }}! 👋 Saya **PharmAI**, asisten pintar **APOTEK ITU TOKO OBAT**.\n\nAda keluhan kesehatan, luka, rasa sakit, aturan pakai obat, atau stok apotek yang bisa saya bantu hari ini? 😊',
                 'bot'
             );
         }
@@ -1059,10 +1071,15 @@
                 const data = await response.json();
                 rawMessages = data.messages || [];
                 historyLoaded = true;
+
+                if (isViewingHistory) {
+                    const searchVal = document.getElementById('aiHistorySearchInput')?.value || '';
+                    renderHistoryList(searchVal);
+                }
             } catch (err) {
                 console.warn('Gagal memuat riwayat background:', err);
             }
-        };
+        }
 
         // Format waktu ISO ke format lokal ringkas
         function formatTime(dateStr) {
@@ -1141,22 +1158,116 @@
             });
         }
 
+        // Normalisasi teks untuk pencarian riwayat (hapus simbol markdown & rapikan spasi)
+        function normalizeSearchText(str) {
+            return (str || '')
+                .toLowerCase()
+                .replace(/[*_`#~>-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function escapeRegExp(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Sorot kata kunci yang dicari secara aman (anti-XSS & tidak merusak entitas HTML)
+        function highlightPlainText(text, terms) {
+            if (!text) return '';
+            if (!terms || terms.length === 0) return escapeHtml(text);
+
+            const uniqueTerms = [...new Set(terms.filter(Boolean))].sort((a, b) => b.length - a.length);
+            if (uniqueTerms.length === 0) return escapeHtml(text);
+
+            const regex = new RegExp('(' + uniqueTerms.map(escapeRegExp).join('|') + ')', 'gi');
+            const parts = String(text).split(regex);
+
+            return parts.map((part, idx) => {
+                if (idx % 2 === 1) {
+                    return '<mark class="ai-search-highlight">' + escapeHtml(part) + '</mark>';
+                }
+                return escapeHtml(part);
+            }).join('');
+        }
+
+        // Buat cuplikan teks yang terpusat pada kata kunci yang cocok agar terlihat di kartu riwayat
+        function buildMatchSnippet(rawText, terms, maxBefore = 45) {
+            const clean = (rawText || '').replace(/[*_`#]/g, '').replace(/\s+/g, ' ').trim();
+            if (!clean || !terms || terms.length === 0) return clean;
+
+            const lower = clean.toLowerCase();
+            let firstIdx = -1;
+            for (const term of terms) {
+                const idx = lower.indexOf(term.toLowerCase());
+                if (idx !== -1 && (firstIdx === -1 || idx < firstIdx)) {
+                    firstIdx = idx;
+                }
+            }
+
+            if (firstIdx <= maxBefore) return clean;
+            const start = Math.max(0, firstIdx - maxBefore);
+            return '...' + clean.substring(start);
+        }
+
+        // Sorot kata kunci pada text node di dalam elemen chat yang sudah dirender
+        function highlightElementTextNodes(rootEl, terms) {
+            if (!rootEl || !terms || terms.length === 0) return null;
+            const uniqueTerms = [...new Set(terms.filter(Boolean))].sort((a, b) => b.length - a.length);
+            if (uniqueTerms.length === 0) return null;
+
+            const regex = new RegExp('(' + uniqueTerms.map(escapeRegExp).join('|') + ')', 'gi');
+            const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, null);
+            const textNodes = [];
+            let node;
+            while ((node = walker.nextNode())) {
+                if (node.nodeValue && regex.test(node.nodeValue)) {
+                    textNodes.push(node);
+                }
+                regex.lastIndex = 0;
+            }
+
+            let firstMark = null;
+            textNodes.forEach(textNode => {
+                const parts = textNode.nodeValue.split(regex);
+                if (parts.length <= 1) return;
+                const frag = document.createDocumentFragment();
+                parts.forEach((part, idx) => {
+                    if (!part) return;
+                    if (idx % 2 === 1) {
+                        const mark = document.createElement('mark');
+                        mark.className = 'ai-search-highlight';
+                        mark.textContent = part;
+                        if (!firstMark) firstMark = mark;
+                        frag.appendChild(mark);
+                    } else {
+                        frag.appendChild(document.createTextNode(part));
+                    }
+                });
+                textNode.parentNode.replaceChild(frag, textNode);
+            });
+
+            return firstMark;
+        }
+
         // Render List Riwayat di panel History
         function renderHistoryList(filterKeyword = '') {
             const sessions = getConversationSessions();
-            const keyword = (filterKeyword || '').toLowerCase().trim();
+            const normalizedQuery = normalizeSearchText(filterKeyword);
+            const terms = normalizedQuery ? normalizedQuery.split(' ').filter(Boolean) : [];
 
             const filtered = sessions.filter(s => {
-                if (!keyword) return true;
-                if (s.first_user_content.toLowerCase().includes(keyword)) return true;
-                return s.messages.some(m => (m.content || '').toLowerCase().includes(keyword));
+                if (terms.length === 0) return true;
+                const combinedSessionText = normalizeSearchText(
+                    s.first_user_content + ' ' + s.messages.map(m => m.content || '').join(' ')
+                );
+                return terms.every(term => combinedSessionText.includes(term));
             });
 
             if (filtered.length === 0) {
                 historyList.innerHTML = `
                     <div class="ai-history-empty">
                         <i class="far fa-comments"></i>
-                        <p>${keyword ? 'Tidak ada riwayat yang cocok dengan kata kunci.' : 'Belum ada riwayat percakapan.<br>Mulai konsultasi dengan asisten sekarang!'}</p>
+                        <p>${terms.length > 0 ? 'Tidak ada riwayat yang cocok dengan kata kunci <strong>"' + escapeHtml(filterKeyword.trim()) + '"</strong>.' : 'Belum ada riwayat percakapan.<br>Mulai konsultasi dengan asisten sekarang!'}</p>
                     </div>
                 `;
                 return;
@@ -1167,12 +1278,42 @@
                 const item = document.createElement('div');
                 item.className = 'ai-history-item';
                 item.onclick = function() {
-                    openHistorySession(s.session_id);
+                    openHistorySession(s.session_id, terms);
                 };
 
-                // Cari jawaban AI terakhir dalam sesi tersebut
+                // Tentukan pertanyaan & preview jawaban yang ditampilkan (prioritaskan pesan yang cocok saat mencari)
+                let displayQuestion = s.first_user_content;
                 const lastBotMsg = s.messages.slice().reverse().find(m => m.role === 'assistant');
-                const previewText = lastBotMsg ? lastBotMsg.content : (s.latest_content || 'Menunggu jawaban...');
+                let previewText = lastBotMsg ? lastBotMsg.content : (s.latest_content || 'Menunggu jawaban...');
+
+                if (terms.length > 0) {
+                    const matchedUserMsg = s.messages.find(m =>
+                        m.role === 'user' && terms.every(t => normalizeSearchText(m.content).includes(t))
+                    ) || s.messages.find(m =>
+                        m.role === 'user' && terms.some(t => normalizeSearchText(m.content).includes(t))
+                    );
+
+                    if (matchedUserMsg) {
+                        displayQuestion = matchedUserMsg.content;
+                    }
+
+                    const matchedBotMsg = s.messages.find(m =>
+                        m.role === 'assistant' && terms.every(t => normalizeSearchText(m.content).includes(t))
+                    ) || s.messages.find(m =>
+                        m.role === 'assistant' && terms.some(t => normalizeSearchText(m.content).includes(t))
+                    );
+
+                    if (matchedBotMsg) {
+                        previewText = buildMatchSnippet(matchedBotMsg.content, terms);
+                    }
+                }
+
+                const questionHtml = terms.length > 0
+                    ? highlightPlainText(buildMatchSnippet(displayQuestion, terms, 60), terms)
+                    : escapeHtml(displayQuestion);
+                const previewHtml = terms.length > 0
+                    ? highlightPlainText(previewText, terms)
+                    : escapeHtml(previewText);
 
                 item.innerHTML = `
                     <div class="ai-history-meta">
@@ -1184,15 +1325,15 @@
                             </button>
                         </div>
                     </div>
-                    <p class="ai-history-question">${escapeHtml(s.first_user_content)}</p>
-                    <p class="ai-history-answer-preview">${escapeHtml(previewText)}</p>
+                    <p class="ai-history-question">${questionHtml}</p>
+                    <p class="ai-history-answer-preview">${previewHtml}</p>
                 `;
 
                 const deleteBtn = item.querySelector('.ai-history-delete-btn');
                 if (deleteBtn) {
                     deleteBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        confirmDeleteSession(s.session_id, s.first_user_content);
+                        confirmDeleteSession(s.session_id, displayQuestion);
                     });
                 }
 
@@ -1205,12 +1346,13 @@
         }
 
         // Buka seluruh riwayat satu sesi ke dalam chat box agar user bisa membaca & melanjutkan obrolan
-        function openHistorySession(sessionId) {
+        function openHistorySession(sessionId, highlightTerms = []) {
             toggleHistoryView(false);
             chatBox.innerHTML = '';
 
             const sessions = getConversationSessions();
             const sess = sessions.find(s => s.session_id === sessionId);
+            let firstHighlightEl = null;
 
             if (sess && sess.messages.length > 0) {
                 currentSessionId = sess.session_id;
@@ -1230,16 +1372,26 @@
 
                 // Tampilkan semua percakapan di dalam sesi ini
                 sess.messages.forEach(msg => {
-                    appendAiMessage(msg.content, msg.role === 'assistant' ? 'bot' : 'user', false, msg.id);
+                    const bubble = appendAiMessage(msg.content, msg.role === 'assistant' ? 'bot' : 'user', false, msg.id);
+                    if (highlightTerms && highlightTerms.length > 0) {
+                        const found = highlightElementTextNodes(bubble, highlightTerms);
+                        if (found && !firstHighlightEl) {
+                            firstHighlightEl = found;
+                        }
+                    }
                 });
             } else {
                 showWelcomeGreeting();
             }
 
             setTimeout(() => {
-                chatBox.scrollTop = chatBox.scrollHeight;
+                if (firstHighlightEl) {
+                    firstHighlightEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
                 messageInput.focus();
-            }, 50);
+            }, 60);
         }
 
         // Toggle antara Tampilan Chat dan Tampilan Riwayat
@@ -1252,13 +1404,14 @@
                 historyBtn.classList.add('active');
                 historyBtnIcon.className = 'fas fa-comment-dots';
                 headerTitle.textContent = 'Riwayat Chat';
-                renderHistoryList();
+                const searchVal = document.getElementById('aiHistorySearchInput')?.value || '';
+                renderHistoryList(searchVal);
             } else {
                 historyView.style.display = 'none';
                 chatView.style.display = 'flex';
                 historyBtn.classList.remove('active');
                 historyBtnIcon.className = 'fas fa-history';
-                headerTitle.textContent = 'AI Assistant Apotek';
+                headerTitle.textContent = 'PharmAI';
                 setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
             }
         }

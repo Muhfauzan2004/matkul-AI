@@ -7,17 +7,17 @@
 }
 
 :root {
-    /* Palette from https://coolors.co/palette/03045e-023e8a-0077b6-0096c7-00b4d8-48cae4-90e0ef-ade8f4-caf0f8 */
-    --dark: #03045e;
-    --primary-dark: #023e8a;
-    --primary: #0077b6;
-    --primary-medium: #0096c7;
-    --primary-light: #00b4d8;
-    --accent-1: #48cae4;
-    --accent-2: #90e0ef;
-    --accent-3: #ade8f4;
-    --accent-4: #caf0f8;
-    --primary-glow: rgba(0, 180, 216, 0.12);
+    /* Opsi B: Emerald Pharmacy Green & Slate Palette */
+    --dark: #022c22;
+    --primary-dark: #065f46;
+    --primary: #059669;
+    --primary-medium: #10b981;
+    --primary-light: #34d399;
+    --accent-1: #6ee7b7;
+    --accent-2: #a7f3d0;
+    --accent-3: #d1fae5;
+    --accent-4: #ecfdf5;
+    --primary-glow: rgba(5, 150, 105, 0.28);
     --success: #10b981;
     --success-light: #d1fae5;
     --success-dark: #065f46;
@@ -27,29 +27,29 @@
     --danger: #ef4444;
     --danger-light: #fee2e2;
     --danger-dark: #991b1b;
-    --sidebar-bg: linear-gradient(180deg, var(--dark) 0%, var(--primary-dark) 100%);
-    --sidebar-width: 240px;
+    --sidebar-bg: linear-gradient(180deg, #022c22 0%, #064e3b 58%, #065f46 100%);
+    --sidebar-width: 248px;
     --gray-50: #f8fafc;
     --gray-100: #f1f5f9;
     --gray-200: #e2e8f0;
     --gray-300: #cbd5e1;
     --gray-400: #94a3b8;
-    --gray-500: #505c6e;
+    --gray-500: #64748b;
     --gray-600: #475569;
     --gray-700: #334155;
     --gray-800: #1e293b;
     --white: #ffffff;
     --radius: 16px;
     --radius-sm: 10px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 10px 15px -3px rgba(0, 119, 182, 0.08), 0 4px 6px -2px rgba(0, 119, 182, 0.03);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 119, 182, 0.1), 0 10px 10px -5px rgba(0, 119, 182, 0.04);
+    --shadow: 0 4px 6px -1px rgba(2, 44, 34, 0.05), 0 2px 4px -1px rgba(2, 44, 34, 0.03);
+    --shadow-md: 0 10px 15px -3px rgba(5, 150, 105, 0.08), 0 4px 6px -2px rgba(5, 150, 105, 0.03);
+    --shadow-lg: 0 20px 25px -5px rgba(5, 150, 105, 0.1), 0 10px 10px -5px rgba(5, 150, 105, 0.04);
     --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
     font-family: 'Outfit', 'Inter', sans-serif;
-    background: #f5f6fa;
+    background: #f4f8f6;
     color: var(--gray-800);
     line-height: 1.6;
     display: flex;
@@ -61,7 +61,7 @@ body {
 .sidebar {
     width: var(--sidebar-width);
     background: var(--sidebar-bg);
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.7);
     position: fixed;
     top: 0;
     left: 0;
@@ -69,14 +69,14 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 50;
-    box-shadow: 4px 0 25px rgba(16, 10, 38, 0.15);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 4px 0 25px rgba(2, 44, 34, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
     overflow-y: auto;
 }
 
 .sidebar-header {
-    padding: 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 1.25rem 1.15rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
 }
@@ -84,21 +84,23 @@ body {
 .sidebar-brand {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.65rem;
     text-decoration: none;
     color: var(--white);
     font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
+    font-size: 0.92rem;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
 }
 
 .sidebar-brand i {
-    background: linear-gradient(135deg, #00b4d8 0%, var(--primary) 100%);
+    background: linear-gradient(135deg, #34d399 0%, #a7f3d0 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-size: 1.4rem;
-    filter: drop-shadow(0 2px 8px rgba(0, 119, 182, 0.4));
+    font-size: 1.45rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.4));
 }
 
 .sidebar-nav {
@@ -151,7 +153,7 @@ body {
     top: 25%;
     height: 50%;
     width: 4px;
-    background: #00b4d8;
+    background: #a7f3d0;
     border-radius: 0 4px 4px 0;
 }
 
