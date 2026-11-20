@@ -1,0 +1,348 @@
+/* ===== APOTEK SULTHAN ELIDAS - AUTHENTICATION SCREEN SHARING STYLES ===== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --primary: #0077b6;
+    --primary-dark: #03045e;
+    --primary-light: #00b4d8;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --radius: 24px;
+    --radius-sm: 12px;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: radial-gradient(circle at 10% 20%, rgba(3, 4, 94, 0.95) 0%, rgba(2, 62, 138, 0.95) 40%, rgba(11, 15, 25, 1) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Ambient glowing background blobs */
+.bg-blob {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 180, 216, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+.blob-1 { top: -100px; left: -100px; }
+.blob-2 { bottom: -100px; right: -100px; }
+
+.login-container, .register-container {
+    width: 100%;
+    position: relative;
+    z-index: 10;
+}
+.login-container { max-width: 430px; }
+.register-container { max-width: 440px; }
+
+.login-brand, .register-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.register-brand {
+    margin-bottom: 1.75rem;
+}
+
+.login-brand-icon, .register-brand-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: white;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 8px 24px rgba(0, 180, 216, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: pulse-glow 3s infinite;
+}
+.register-brand-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    font-size: 1.5rem;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 8px 24px rgba(0, 180, 216, 0.35); transform: translateY(0); }
+    50% { box-shadow: 0 8px 36px rgba(0, 180, 216, 0.55); transform: translateY(-2px); }
+}
+
+.login-brand h1, .register-brand h1 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+}
+
+.login-brand h1 span, .register-brand h1 span {
+    background: linear-gradient(135deg, #00b4d8 0%, #ade8f4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-brand p, .register-brand p {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    margin-top: 0.25rem;
+    letter-spacing: 0.03em;
+}
+
+.login-card, .register-card {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    padding: 2.25rem 2.5rem;
+    box-shadow: 0 25px 60px -15px rgba(3, 4, 94, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.register-card {
+    padding: 2rem 2.25rem;
+}
+
+.login-card h2, .register-card h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    letter-spacing: -0.01em;
+}
+.register-card h2 {
+    margin-bottom: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+.register-card .form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+}
+.register-card .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+}
+
+.input-icon-group {
+    position: relative;
+}
+
+.input-icon-group > i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    pointer-events: none;
+}
+.register-card .input-icon-group > i {
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.6rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: #1e293b;
+    transition: all 0.25s;
+    background: #f8fafc;
+}
+.register-card .form-control {
+    padding: 0.65rem 1rem 0.65rem 2.5rem;
+    font-size: 0.85rem;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.15);
+}
+
+.form-control:focus + i {
+    color: var(--primary);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0;
+    font-size: 0.82rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.form-check input {
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300);
+}
+
+.btn-login, .btn-register {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(2, 62, 138, 0.2);
+}
+.btn-register {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    margin-top: 1.25rem;
+}
+
+.btn-login:hover, .btn-register:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(2, 62, 138, 0.3);
+}
+
+.btn-login:active, .btn-register:active {
+    transform: translateY(0);
+}
+
+.login-footer, .register-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+}
+.register-footer {
+    margin-top: 1.25rem;
+}
+
+.login-footer a, .register-footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.login-footer a:hover, .register-footer a:hover {
+    color: var(--primary-light);
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.25rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.register-card .alert {
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.demo-accounts {
+    margin-top: 1.75rem;
+    padding: 1.15rem;
+    background: #f1f5f9;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--gray-300);
+}
+
+.demo-accounts h4 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.demo-account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.demo-account-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: #334155;
+    padding: 0.35rem 0.5rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.demo-account-item strong {
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.demo-account-item code {
+    font-family: monospace;
+    color: var(--primary);
+    background: #e0f2fe;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.74rem;
+}

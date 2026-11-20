@@ -1,0 +1,11 @@
+/* Import modal file upload area */
+.import-drop-zone {
+    border: 2px dashed var(--accent-4);
+    border-radius: var(--radius-sm);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: var(--accent-4);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.import-drop-zone:hover { border-color: var(--accent-1); }

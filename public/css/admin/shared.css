@@ -1,0 +1,554 @@
+/* ===================================================================
+   APOTEK SULTHAN ELIDAS — Admin Shared Styles
+   Dipakai bersama oleh seluruh halaman admin panel.
+   Layout & base component sudah ada di layouts/admin.blade.php,
+   file ini menambahkan komponen yang berulang di halaman-halaman
+   konten (obat, order, stock, laporan, kategori, dll).
+   =================================================================== */
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.page-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--gray-800);
+    line-height: 1.2;
+}
+
+.page-title span {
+    color: var(--primary);
+}
+
+.page-subtitle {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-top: 3px;
+    font-weight: 400;
+}
+
+/* ===== FILTER / SEARCH BAR ===== */
+.filter-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper i {
+    position: absolute;
+    left: 0.65rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.search-input-wrapper input {
+    padding-left: 2rem;
+}
+
+/* ===== ICON BUTTONS (tabel aksi) ===== */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.8rem;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.btn-icon-blue {
+    background: var(--accent-4);
+    color: var(--primary);
+}
+
+.btn-icon-blue:hover {
+    background: var(--primary-light);
+    color: white;
+}
+
+.btn-icon-amber {
+    background: var(--accent-3);
+    color: var(--primary-medium);
+}
+
+.btn-icon-amber:hover {
+    background: var(--primary-medium);
+    color: white;
+}
+
+.btn-icon-red {
+    background: var(--accent-2);
+    color: var(--primary-dark);
+}
+
+.btn-icon-red:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+
+.btn-icon-green {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.btn-icon-green:hover {
+    background: var(--success);
+    color: white;
+}
+
+.action-group {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+/* ===== SUMMARY / KPI BARS ===== */
+.summary-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.summary-item {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    transition: var(--transition);
+}
+
+.summary-item:hover {
+    box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.summary-label {
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.summary-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--gray-800);
+    line-height: 1.1;
+}
+
+/* ===== EMPTY STATE (FANCY) ===== */
+.empty-fancy {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--gray-400);
+}
+
+.empty-fancy .empty-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--gray-100);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--gray-300);
+}
+
+.empty-fancy h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 0.4rem;
+}
+
+.empty-fancy p {
+    font-size: 0.83rem;
+}
+
+/* ===== KPI REPORT CARDS ===== */
+.kpi-report {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.kpi-r {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.kpi-r:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-r .accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 4px 0 0 4px;
+}
+
+.kpi-r-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-left: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.kpi-r-value {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--gray-800);
+    padding-left: 0.5rem;
+    line-height: 1;
+}
+
+.kpi-r-value.sm {
+    font-size: 1.2rem;
+}
+
+.kpi-r-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+/* ===== SECTION HEADER (card internal) ===== */
+.section-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-action {
+    font-size: 0.78rem;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.section-action:hover {
+    text-decoration: underline;
+}
+
+/* ===== CODE / KODE PILL ===== */
+.kode-pill {
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.75rem;
+    font-family: monospace;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* ===== STOK PROGRESS BAR ===== */
+.stok-bar-bg {
+    width: 60px;
+    height: 5px;
+    background: var(--gray-100);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 3px;
+}
+
+.stok-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* ===== MODAL OVERLAY ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 480px;
+    margin: 1rem;
+    border-radius: var(--radius);
+    background: var(--white);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, var(--accent-1) 0%, var(--primary-medium) 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    border-top: 1px solid var(--gray-100);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* ===== FILTER PANEL (laporan) ===== */
+.filter-panel {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-panel h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gray-600);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* ===== CHART BAR (CSS-only fallback) ===== */
+.chart-bar-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 100px;
+    margin-top: 0.5rem;
+}
+
+.chart-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.chart-bar {
+    width: 100%;
+    background: linear-gradient(180deg, var(--primary-light), var(--primary));
+    border-radius: 4px 4px 0 0;
+    min-height: 3px;
+    transition: height 0.4s ease;
+}
+
+.chart-bar-label {
+    font-size: 0.68rem;
+    color: var(--gray-400);
+}
+
+/* ===== OBAT TABLE SPECIFIC ===== */
+.obat-table th {
+    background: var(--gray-50);
+}
+
+.obat-table td {
+    vertical-align: middle;
+}
+
+.obat-name {
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 0.87rem;
+}
+
+.obat-name small {
+    display: block;
+    font-weight: 400;
+    color: var(--gray-400);
+    font-size: 0.73rem;
+    margin-top: 1px;
+}
+
+.price-col {
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 0.83rem;
+}
+
+.price-col small {
+    display: block;
+    color: var(--gray-400);
+    font-size: 0.72rem;
+    font-weight: 400;
+}
+
+/* ===== ORDER TABLE SPECIFIC ===== */
+.no-order-link {
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.no-order-link:hover {
+    text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .summary-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kpi-report {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .summary-bar,
+    .kpi-report {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

@@ -1,0 +1,113 @@
+/* ===== Profile Page Styles ===== */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Avatar Card */
+.avatar-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-align: center;
+}
+
+.avatar-card-top {
+    padding: 2rem 1.5rem 1.5rem;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 100%);
+}
+
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+}
+
+.avatar-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.avatar-role-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.avatar-stats {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.avatar-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--gray-200);
+    font-size: 0.8rem;
+}
+
+.avatar-stat-row:last-child {
+    border-bottom: none;
+}
+
+.avatar-stat-label {
+    color: var(--gray-500);
+}
+
+.avatar-stat-value {
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+/* Password Strength */
+.pwd-strength-bar {
+    display: flex;
+    gap: 3px;
+    margin-top: 0.4rem;
+    height: 4px;
+}
+
+.pwd-strength-bar span {
+    flex: 1;
+    border-radius: 999px;
+    background: var(--gray-200);
+    transition: background 0.3s ease;
+}
+
+.pwd-strength-text {
+    font-size: 0.72rem;
+    margin-top: 0.3rem;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+@media (max-width: 900px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}

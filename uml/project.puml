@@ -1,0 +1,196 @@
+@startuml
+' UML class diagram generated for tokoobat Laravel project
+skinparam classAttributeIconSize 0
+
+package "Models" {
+    class User {
+        +string name
+        +string email
+        +string password
+        +string role
+        +string phone
+        +string address
+        +string photo
+        +bool isSuperAdmin()
+        +bool isAdmin()
+        +bool isPemilik()
+        +bool hasAdminAccess()
+        +orders()
+    }
+
+    class Obat {
+        +string kode
+        +string nama_obat
+        +int kategori_id
+        +int stok
+        +string satuan
+        +decimal harga_umum
+        +decimal harga_barang
+        +decimal harga_jual_bpjs
+        +string deskripsi
+        +string gambar
+        +bool is_active
+        +bool is_approved
+        +kategori()
+        +orderItems()
+        +generateKodeObat()
+    }
+
+    class Kategori {
+        +string nama_kategori
+        +string slug
+        +string deskripsi
+        +obat()
+    }
+
+    class Order {
+        +string no_order
+        +int user_id
+        +string status
+        +decimal total_harga
+        +string alamat_pengiriman
+        +string metode_pembayaran
+        +string catatan
+        +user()
+        +items()
+        +generateNoOrder()
+    }
+
+    class OrderItem {
+        +int order_id
+        +int obat_id
+        +int jumlah
+        +decimal harga_satuan
+        +decimal subtotal
+        +order()
+        +obat()
+    }
+
+    class StockAddition {
+        +int obat_id
+        +int jumlah
+        +string catatan
+        +string status
+        +obat()
+    }
+}
+
+package "Controllers\Admin" {
+    class DashboardController {
+        +index()
+    }
+    class ObatController {
+        +index()
+        +create()
+        +store()
+        +show()
+        +edit()
+        +update()
+        +destroy()
+        +importExcel()
+    }
+    class KategoriController {
+        +index()
+        +create()
+        +store()
+        +edit()
+        +update()
+        +destroy()
+    }
+    class OrderController {
+        +index()
+        +create()
+        +store()
+        +show()
+        +updateStatus()
+    }
+    class ReportController {
+        +sales()
+    }
+    class StockController {
+        +index()
+        +add()
+    }
+    class UserController {
+        +index()
+        +create()
+        +store()
+        +edit()
+        +update()
+        +destroy()
+    }
+    class ProfileController {
+        +edit()
+        +update()
+        +updatePassword()
+    }
+}
+
+package "Controllers\Pemilik" {
+    class DashboardController {
+        +index()
+    }
+    class ObatController {
+        +index()
+        +approve()
+    }
+    class StockAdditionController {
+        +index()
+        +approve()
+        +reject()
+    }
+    class ReportController {
+        +income()
+    }
+    class UserController {
+        +index()
+        +create()
+        +store()
+        +edit()
+        +update()
+        +destroy()
+    }
+    class ProfileController {
+        +edit()
+        +update()
+        +updatePassword()
+    }
+}
+
+package "Controllers" {
+    class AuthController {
+        +showLogin()
+        +login()
+        +showRegister()
+        +register()
+        +logout()
+    }
+    class ProfileController {
+        +edit()
+        +update()
+        +updatePassword()
+    }
+}
+
+' Domain relationships
+User "1" -- "0..*" Order : places >
+Kategori "1" -- "0..*" Obat : contains >
+Obat "1" -- "0..*" OrderItem : referenced by >
+Order "1" -- "0..*" OrderItem : owns >
+Obat "1" -- "0..*" StockAddition : requested by >
+
+' Controller usage relationships
+DashboardController ..> Obat : queries
+ObatController ..> Obat : manages
+KategoriController ..> Kategori : manages
+OrderController ..> Order : manages
+OrderController ..> OrderItem : reads
+ReportController ..> Order : reports
+StockController ..> Obat : looks up
+StockAdditionController ..> StockAddition : manages
+StockAdditionController ..> Obat : updates
+Pemilik\ObatController ..> Obat : approves
+AuthController ..> User : authenticates
+ProfileController ..> User : updates
+
+@enduml

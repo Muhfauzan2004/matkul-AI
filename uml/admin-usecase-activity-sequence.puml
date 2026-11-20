@@ -1,0 +1,99 @@
+@startuml
+' Use Case Diagram for Admin
+actor Admin
+rectangle "TokoObat Admin System" {
+    usecase "Login / Logout" as UC1
+    usecase "Lihat Dashboard" as UC2
+    usecase "Kelola Obat" as UC3
+    usecase "Import Obat dari Excel" as UC4
+    usecase "Kelola Kategori" as UC5
+    usecase "Kelola Pesanan" as UC6
+    usecase "Update Status Pesanan" as UC7
+    usecase "Kelola Stok Obat" as UC8
+    usecase "Kelola User" as UC9
+    usecase "Lihat Laporan Penjualan" as UC10
+    usecase "Edit Profil" as UC11
+    usecase "Ubah Password" as UC12
+}
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+
+@enduml
+
+@startuml
+' Activity Diagram for Admin Managing Medicines (Obat)
+start
+:Login sebagai Admin;
+:Open Dashboard Admin;
+:Navigate ke halaman Obat;
+if (Apakah ingin mencari / menyaring obat?) then (Ya)
+  :Masukkan kata kunci / filter kategori / status;
+  :Tampilkan daftar obat sesuai filter;
+else (Tidak)
+  :Tampilkan daftar semua obat;
+endif
+if (Aksi pengguna) then (Tambah Obat)
+  :Buka form tambah obat;
+  :Isi data obat dan pilih kategori;
+  :Unggah gambar (opsional);
+  :Kirim form;
+  :Validasi data oleh ObatController;
+  :Simpan data obat baru;
+  :Redirect ke daftar obat dengan success;
+else if (Edit Obat)
+  :Buka halaman edit obat;
+  :Ubah informasi obat;
+  :Kirim form;
+  :Validasi dan update data;
+  :Redirect ke daftar obat;
+else if (Hapus Obat)
+  :Klik tombol hapus;
+  :Validasi kesiapan penghapusan;
+  :Hapus obat dari database;
+  :Redirect ke daftar obat;
+else if (Import Excel)
+  :Unggah file Excel/CVS;
+  :Controller validasi dan proses file;
+  :Simpan obat baru dari file;
+  :Tampilkan ringkasan import;
+else
+  :Tutup halaman Obat;
+endif
+stop
+@enduml
+
+@startuml
+' Sequence Diagram for Admin Creating a Manual Order
+actor Admin
+participant Browser
+participant "OrderController" as Controller
+participant "Obat Model" as Obat
+participant "Order Model" as Order
+participant "OrderItem Model" as OrderItem
+participant Database
+
+Admin -> Browser: Pilih menu Tambah Pesanan
+Browser -> Controller: GET /admin/orders/create
+Controller --> Browser: Render form pesanan
+Admin -> Browser: Submit form pesanan
+Browser -> Controller: POST /admin/orders
+Controller -> Obat: find(obat_id)
+Obat --> Controller: obat
+Controller -> Obat: decrement('stok', jumlah)
+Controller -> Order: create(data)
+Order --> Controller: order
+Controller -> OrderItem: createMany(items)
+OrderItem --> Controller: items created
+Controller -> Browser: Redirect success ke orders.index
+Browser --> Admin: Tampilkan notifikasi berhasil
+@enduml
