@@ -17,13 +17,10 @@ class UserController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
-            });
+            $this->applySearchFilter($query, $request->search, ['name', 'email']);
         }
 
-        $users = $query->orderBy('name')->paginate(10);
+        $users = $query->orderBy('name')->paginate(10)->withQueryString();
 
         return view('admin.user.index', compact('users'));
     }

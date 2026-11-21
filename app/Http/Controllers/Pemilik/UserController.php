@@ -12,12 +12,9 @@ class UserController extends Controller
     {
         $query = User::whereIn('role', ['admin']); // Hanya tampilkan admin, bukan super_admin
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
-            });
+            $this->applySearchFilter($query, $request->search, ['name', 'email']);
         }
-        $users = $query->orderBy('name')->paginate(10);
+        $users = $query->orderBy('name')->paginate(10)->withQueryString();
         return view('pemilik.user.index', compact('users'));
     }
 

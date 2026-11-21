@@ -13,15 +13,17 @@ class OrderController extends Controller
         $query = Order::with('user', 'items.obat');
 
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('no_order', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function ($q2) use ($request) {
-                      $q2->where('name', 'like', '%' . $request->search . '%');
+            $search = trim($request->search);
+            $op = $this->likeOperator();
+            $query->where(function ($q) use ($search, $op) {
+                $q->where('no_order', $op, '%' . $search . '%')
+                  ->orWhereHas('user', function ($q2) use ($search, $op) {
+                      $q2->where('name', $op, '%' . $search . '%');
                   });
             });
         }
 
-        $orders = $query->latest()->paginate(10);
+        $orders = $query->latest()->paginate(10)->withQueryString();
 
         return view('admin.order.index', compact('orders'));
     }

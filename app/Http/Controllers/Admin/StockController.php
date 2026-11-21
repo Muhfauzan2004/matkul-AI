@@ -13,17 +13,14 @@ class StockController extends Controller
         $query = Obat::with('kategori')->where('is_approved', true);
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('nama_obat', 'like', '%' . $request->search . '%')
-                  ->orWhere('kode', 'like', '%' . $request->search . '%');
-            });
+            $this->applySearchFilter($query, $request->search, ['nama_obat', 'kode']);
         }
 
         // Fetch active & approved medicines for stock additions
         $obatsSelection = Obat::where('is_active', true)->where('is_approved', true)->orderBy('nama_obat')->get();
 
         // Paginate only approved medicines to view their stock statuses
-        $obats = $query->orderBy('stok', 'asc')->paginate(10);
+        $obats = $query->orderBy('stok', 'asc')->paginate(10)->withQueryString();
 
         return view('admin.stock.index', compact('obats', 'obatsSelection'));
     }

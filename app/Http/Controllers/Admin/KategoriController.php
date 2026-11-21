@@ -14,7 +14,7 @@ class KategoriController extends Controller
         $query = Kategori::withCount('obat')->orderBy('nama_kategori');
 
         if ($request->filled('search')) {
-            $query->where('nama_kategori', 'like', '%' . $request->search . '%');
+            $this->applySearchFilter($query, $request->search, ['nama_kategori']);
         }
 
         $kategoris = $query->paginate(15)->withQueryString();

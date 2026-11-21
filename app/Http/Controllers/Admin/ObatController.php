@@ -15,10 +15,7 @@ class ObatController extends Controller
         $query = Obat::with('kategori');
 
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nama_obat', 'like', '%' . $request->search . '%')
-                  ->orWhere('kode', 'like', '%' . $request->search . '%');
-            });
+            $this->applySearchFilter($query, $request->search, ['nama_obat', 'kode']);
         }
 
         if ($request->filled('kategori')) {
@@ -177,10 +174,7 @@ class ObatController extends Controller
         $query = Obat::with('kategori');
 
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nama_obat', 'like', '%' . $request->search . '%')
-                  ->orWhere('kode', 'like', '%' . $request->search . '%');
-            });
+            $this->applySearchFilter($query, $request->search, ['nama_obat', 'kode']);
         }
 
         if ($request->filled('kategori')) {
@@ -340,7 +334,7 @@ class ObatController extends Controller
                 }
 
                 // Look up or dynamically create Kategori
-                $kategori = \App\Models\Kategori::where('nama_kategori', 'like', $categoryName)->first();
+                $kategori = \App\Models\Kategori::where('nama_kategori', $this->likeOperator(), $categoryName)->first();
                 if (!$kategori) {
                     $kategori = \App\Models\Kategori::create([
                         'nama_kategori' => $categoryName,

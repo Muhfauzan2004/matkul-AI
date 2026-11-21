@@ -22,18 +22,14 @@ class ObatController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_obat', 'like', '%' . $search . '%')
-                  ->orWhere('kode', 'like', '%' . $search . '%');
-            });
+            $this->applySearchFilter($query, $request->search, ['nama_obat', 'kode']);
         }
 
         if ($request->filled('kategori_id')) {
             $query->where('kategori_id', $request->kategori_id);
         }
 
-        $obats = $query->orderBy('is_approved', 'asc')->orderBy('nama_obat')->paginate(10);
+        $obats = $query->orderBy('is_approved', 'asc')->orderBy('nama_obat')->paginate(10)->withQueryString();
         $kategoris = Kategori::orderBy('nama_kategori')->get();
 
         return view('pemilik.obat.index', compact('obats', 'kategoris'));
