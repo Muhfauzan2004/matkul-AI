@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AiMessage;
 use App\Models\Obat;
 use App\Models\Kategori;
+use App\Models\StockAddition;
 use App\Models\AturanRekomendasiObat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -22,6 +23,7 @@ class AIController extends Controller
 
     private int $maxHistory = 12;
     private ?string $activeSessionId = null;
+    private const STOCK_CLARIFICATION_HEADER = '📦 **Konfirmasi Spesifikasi Update Stok**';
 
     public function chat(Request $request)
     {
@@ -103,6 +105,16 @@ class AIController extends Controller
         $thresholdData = $this->parseStockThreshold($teks);
         if ($thresholdData !== null) {
             return $this->handleStockThresholdQuery($user, $thresholdData, $obat);
+        }
+
+        // 4b. Prioritas Update Stok Obat (Penambahan & Pengurangan via Persetujuan Pemilik)
+        $isStockFollowUp = $this->isPendingStockClarification($riwayat)
+            && !$this->isOutOfStockListRequest($teks)
+            && !$this->isAvailableListRequest($teks)
+            && !$this->isCategoryListRequest($teks);
+
+        if ($isStockFollowUp || $this->isStockUpdateIntent($teks)) {
+            return $this->handleStockUpdateConversation($user, $teks, $pertanyaan, $riwayat, $obat, $namaPengguna);
         }
 
         // 5. Prioritas Daftar Obat Habis (Stok 0)
@@ -1254,6 +1266,7 @@ class AIController extends Controller
             ->map(function ($item) {
                 return [
                     'id' => $item->id,
+                    'kode' => $item->kode,
                     'nama_obat' => $item->nama_obat,
                     'kategori' => $item->kategori?->nama_kategori ?? 'Umum',
                     'stok' => max(0, (int) $item->stok),
@@ -1262,6 +1275,568 @@ class AIController extends Controller
                     'deskripsi' => $item->deskripsi ?: '',
                 ];
             });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PENGATURAN & PENGAJUAN UPDATE STOK OBAT VIA PHARMAI (BUTUH APPROVE PEMILIK)
+    |--------------------------------------------------------------------------
+    */
+
+    private function isPendingStockClarification(Collection $riwayat): bool
+    {
+        $lastAssistant = $riwayat->where('role', 'assistant')->last();
+        if (!$lastAssistant) {
+            return false;
+        }
+
+        return str_contains((string) $lastAssistant->content, self::STOCK_CLARIFICATION_HEADER);
+    }
+
+    private function isStockUpdateIntent(string $teks): bool
+    {
+        if (preg_match('/\b(kurang\s+dari|kurang\s+dr|lebih\s+dari|di\s*bawah|dibawah|di\s*atas|diatas)\b/iu', $teks)) {
+            return false;
+        }
+
+        if (preg_match('/\b(penambahan|pengurangan|update|ubah|edit|sesuaikan|penyesuaian|input|catat)\s+(?:data\s+)?stok\b/iu', $teks)) {
+            return true;
+        }
+
+        if (preg_match('/\bstok\s+(?:masuk|keluar|bertambah|berkurang|ditambah(?:kan)?|dikurang(?:i|kan)?)\b/iu', $teks)) {
+            return true;
+        }
+
+        if (preg_match('/\b(tambah|tambahkan|tambahin|restock|re-stock|restok|kurang|kurangi|kurangkan|kurangin|potong)\s+(?:data\s+|jumlah\s+)?stok\b/iu', $teks)) {
+            return true;
+        }
+
+        if (preg_match('/\b(?:stok\b.*?\b(?:tambahkan|tambahin|tambah|kurangi|kurangkan|kurangin|restock|restok))\b/iu', $teks)) {
+            return true;
+        }
+
+        if (preg_match('/\b(tambahkan|tambahin|kurangi|kurangkan|kurangin|restock|restok)\s+(?:stok\s+|obat\s+)?(?:\d+\s+)?[a-z]/iu', $teks)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function handleStockUpdateConversation(
+        $user,
+        string $teks,
+        string $pertanyaan,
+        Collection $riwayat,
+        Collection $obat,
+        string $namaPengguna
+    ) {
+        if (preg_match('/\b(batal|batalkan|cancel|tidak\s+jadi|gak\s+jadi|ga\s+jadi|gajadi|nggak\s+jadi|stop)\b/iu', $teks)) {
+            return $this->sendReply($user, 'Baik, pengajuan update stok dibatalkan. Ada informasi obat atau stok lain yang bisa aku bantu?');
+        }
+
+        if (!$user->isAdmin()) {
+            if ($user->isPemilik()) {
+                return $this->sendReply(
+                    $user,
+                    "🔒 Pengajuan update stok melalui **PharmAI** hanya dapat dibuat oleh **Admin Apotek** agar proses persetujuan tetap terpisah.\n\n"
+                    . "Sebagai **Pemilik**, Anda dapat meninjau, menyetujui, atau menolak seluruh pengajuan perubahan stok di menu **Persetujuan Stok**."
+                );
+            }
+
+            return $this->sendReply($user, '🔒 Maaf, fitur pengajuan update stok hanya tersedia untuk role **Admin Apotek** dan tetap memerlukan persetujuan **Pemilik**.');
+        }
+
+        [$userTurns, $prevPrompt] = $this->collectStockClarificationContext($riwayat, $pertanyaan);
+        $parsed = $this->parseStockUpdateDetails($userTurns, $prevPrompt, $obat);
+
+        // 1. Pastikan jenis aksi (penambahan / pengurangan) jelas
+        if ($parsed['action'] === null) {
+            return $this->sendReply(
+                $user,
+                self::STOCK_CLARIFICATION_HEADER . "\n\n"
+                . "Apakah Anda ingin mengajukan **penambahan (+)** atau **pengurangan (-)** stok?\n"
+                . "Mohon sebutkan jenis perubahannya beserta **nama obat spesifik (berapa ml/mg)**, **jumlah**, dan **satuannya (pcs/botol/tablet)**.\n\n"
+                . "*Contoh:* `tambah stok Ambroxol 60ml 5 botol` atau `kurangi stok Paracetamol 500mg 10 tablet`."
+            );
+        }
+
+        $actionLabel = $parsed['action'] === 'reduce' ? 'pengurangan' : 'penambahan';
+        $candidates = $parsed['candidates'];
+
+        // 2. Tidak ada obat yang cocok
+        if ($candidates->isEmpty()) {
+            return $this->sendReply(
+                $user,
+                self::STOCK_CLARIFICATION_HEADER . "\n\n"
+                . "Aku belum menemukan obat aktif yang cocok untuk pengajuan **{$actionLabel} stok** tersebut.\n"
+                . "Mohon sebutkan **nama obat**, **varian (berapa ml/mg)**, **merek** atau **kode obat (OBT...)** yang lebih spesifik, atau ketik `batal` untuk membatalkan."
+            );
+        }
+
+        // 3. Lebih dari 1 kandidat cocok -> minta klarifikasi spesifik (ml/mg/merek/pcs/kode)
+        if ($candidates->count() > 1) {
+            return $this->sendReply(
+                $user,
+                $this->buildAmbiguousStockReply($candidates, $actionLabel, $parsed['qty'], $parsed['unit'])
+            );
+        }
+
+        // 4. Tepat 1 kandidat ditemukan
+        $target = $candidates->first();
+        $satuanDb = $target['satuan'] ?: 'Unit';
+        $satuanDbLower = mb_strtolower($satuanDb);
+        $missingParts = [];
+
+        // Cek apakah nama obat punya takaran/kemasan spesifik (ml/mg/%/dll) dan user belum menyebutkan/mengonfirmasinya
+        if (
+            $this->medicineHasVariantMeasurement($target['nama_obat'])
+            && !$this->userSpecifiedVariantOrConfirmed($target, $parsed)
+        ) {
+            $missingParts[] = "kepastian varian kemasan (**" . $this->extractVariantSpecLabel($target['nama_obat']) . "**)";
+        }
+
+        if ($parsed['ml_as_amount'] && $parsed['qty'] === null && !preg_match('/\bml\b/iu', $satuanDbLower)) {
+            $missingParts[] = "jumlah dalam **{$satuanDbLower} / pcs** (stok di database dicatat dalam satuan **{$satuanDb}**, bukan per ml)";
+        } elseif ($parsed['qty'] === null) {
+            $missingParts[] = "jumlah {$actionLabel} dan satuannya (berapa **{$satuanDbLower} / pcs**)";
+        } elseif (!$parsed['unit_explicit'] && !$parsed['confirmed']) {
+            $missingParts[] = "konfirmasi satuan jumlah (**{$parsed['qty']} {$satuanDbLower}** atau **pcs**?)";
+        }
+
+        if (!empty($missingParts)) {
+            $detailList = implode(' serta ', $missingParts);
+            return $this->sendReply(
+                $user,
+                self::STOCK_CLARIFICATION_HEADER . "\n\n"
+                . "Ditemukan obat berikut untuk **{$actionLabel} stok**:\n"
+                . "1. **[{$target['kode']}] {$target['nama_obat']}**\n"
+                . "   • Satuan Stok: **{$satuanDb}** | Stok Saat Ini: **{$target['stok']} {$satuanDb}**\n\n"
+                . "Agar tidak salah input di database, mohon spesifikasikan lagi {$detailList}.\n"
+                . "*Contoh konfirmasi:* `ya, " . ($parsed['qty'] ?? 5) . " {$satuanDbLower}`"
+                . ($this->medicineHasVariantMeasurement($target['nama_obat']) ? " atau sebutkan `" . $this->extractVariantSpecLabel($target['nama_obat']) . "`" : '')
+                . "."
+            );
+        }
+
+        $qty = (int) $parsed['qty'];
+        if ($qty <= 0) {
+            return $this->sendReply(
+                $user,
+                self::STOCK_CLARIFICATION_HEADER . "\n\n"
+                . "Jumlah {$actionLabel} stok harus lebih dari `0`. Mohon sebutkan jumlahnya dalam **{$satuanDbLower} / pcs**."
+            );
+        }
+
+        // 5. Validasi kecukupan stok untuk pengurangan
+        if ($parsed['action'] === 'reduce' && $qty > (int) $target['stok']) {
+            return $this->sendReply(
+                $user,
+                self::STOCK_CLARIFICATION_HEADER . "\n\n"
+                . "⚠️ **Stok Tidak Mencukupi**\n"
+                . "Pengurangan **{$qty} {$satuanDb}** untuk **[{$target['kode']}] {$target['nama_obat']}** melebihi stok saat ini (**{$target['stok']} {$satuanDb}**).\n\n"
+                . "Silakan masukkan jumlah pengurangan maksimal **{$target['stok']} {$satuanDbLower}**, atau ketik `batal`."
+            );
+        }
+
+        // 6. Buat pengajuan PENDING di stock_additions (TIDAK mengubah obat.stok langsung; wajib approve Pemilik)
+        $signedQty = $parsed['action'] === 'reduce' ? -$qty : $qty;
+        $unitUser = $parsed['unit'] ?: $satuanDbLower;
+        $jenisTeks = $parsed['action'] === 'reduce' ? 'Pengurangan' : 'Penambahan';
+        $tanda = $parsed['action'] === 'reduce' ? '-' : '+';
+
+        $catatan = mb_substr(
+            "[Via PharmAI - {$namaPengguna}] {$jenisTeks} {$qty} {$unitUser} ({$satuanDb}). Pesan: " . implode(' | ', $userTurns),
+            0,
+            245
+        );
+
+        StockAddition::create([
+            'obat_id' => $target['id'],
+            'jumlah' => $signedQty,
+            'catatan' => $catatan,
+            'status' => 'pending',
+        ]);
+
+        $estimasiStok = (int) $target['stok'] + $signedQty;
+        $unitInfo = mb_strtolower($unitUser) !== $satuanDbLower
+            ? "{$qty} {$unitUser} (dicatat sebagai **{$tanda}{$qty} {$satuanDb}**)"
+            : "**{$tanda}{$qty} {$satuanDb}**";
+
+        return $this->sendReply(
+            $user,
+            "✅ **Pengajuan Update Stok Berhasil Dikirim ke Pemilik**\n\n"
+            . "- **Obat:** {$target['nama_obat']} (`{$target['kode']}`)\n"
+            . "- **Jenis:** {$jenisTeks} Stok\n"
+            . "- **Jumlah Diajukan:** {$unitInfo}\n"
+            . "- **Stok Saat Ini (Belum Berubah):** {$target['stok']} {$satuanDb}\n"
+            . "- **Estimasi Setelah Disetujui:** {$estimasiStok} {$satuanDb}\n"
+            . "- **Status:** ⏳ **Menunggu Persetujuan Pemilik (Pending)**\n\n"
+            . "📌 *Stok di database belum berubah dan baru akan diperbarui setelah **Pemilik** menyetujuinya di menu **Persetujuan Stok**.*"
+        );
+    }
+
+    private function collectStockClarificationContext(Collection $riwayat, string $currentMessage): array
+    {
+        $items = $riwayat->values();
+        $collectedTurns = [];
+        $prevPrompt = null;
+
+        for ($i = $items->count() - 1; $i >= 0; $i--) {
+            $msg = $items[$i];
+            $content = (string) $msg->content;
+
+            if ($msg->role === 'assistant') {
+                if (str_contains($content, self::STOCK_CLARIFICATION_HEADER)) {
+                    if ($prevPrompt === null) {
+                        $prevPrompt = $content;
+                    }
+                    continue;
+                }
+                break;
+            }
+
+            if ($msg->role === 'user') {
+                array_unshift($collectedTurns, $content);
+            }
+        }
+
+        $collectedTurns[] = $currentMessage;
+
+        return [$collectedTurns, $prevPrompt];
+    }
+
+    private function parseStockUpdateDetails(array $userTurns, ?string $prevPrompt, Collection $obat): array
+    {
+        $combined = mb_strtolower(preg_replace('/\s+/u', ' ', implode(' ', $userTurns)));
+        $latest = mb_strtolower(preg_replace('/\s+/u', ' ', end($userTurns) ?: ''));
+
+        // Aksi: cek giliran terbaru dulu lalu mundur
+        $action = null;
+        foreach (array_reverse($userTurns) as $turn) {
+            $t = mb_strtolower($turn);
+            if (preg_match('/\b(kurang|kurangi|kurangkan|kurangin|pengurangan|keluar|pengeluaran|pakai|terpakai|terjual|rusak|kadaluarsa|expired|potong|turunkan|turunin|minus)\b/iu', $t)) {
+                $action = 'reduce';
+                break;
+            }
+            if (preg_match('/\b(tambah|tambahkan|tambahin|penambahan|nambah|restock|re-stock|restok|masuk|pemasukan|naikkan|naikin)\b/iu', $t)) {
+                $action = 'add';
+                break;
+            }
+        }
+
+        // Kandidat bernomor dari prompt klarifikasi sebelumnya
+        $prevCandidates = $this->extractPromptCandidateMap($prevPrompt);
+
+        // Deteksi pilihan nomor / kode dari giliran terbaru
+        $selectedCode = null;
+        if (preg_match('/\b([A-Z]{2,6}-?\d{3,})\b/iu', $latest, $m)) {
+            $candidateCode = mb_strtoupper($m[1]);
+            if ($obat->contains(fn($item) => mb_strtoupper((string) ($item['kode'] ?? '')) === $candidateCode)) {
+                $selectedCode = $candidateCode;
+            }
+        }
+        if ($selectedCode === null && !empty($prevCandidates)) {
+            if (preg_match('/\b(?:no|nomor|nomer|pilih|pilihan|opsi|ke)\s*\.?\s*-?\s*(\d+)\b/iu', $latest, $m)) {
+                $idx = (int) $m[1];
+                if (isset($prevCandidates[$idx])) {
+                    $selectedCode = $prevCandidates[$idx];
+                }
+            } elseif (preg_match('/^\s*(\d+)\s*$/u', $latest, $m)) {
+                $idx = (int) $m[1];
+                if (isset($prevCandidates[$idx])) {
+                    $selectedCode = $prevCandidates[$idx];
+                }
+            }
+        }
+
+        // Ekstrak ukuran/dosis (60ml, 100ml, 500mg, 70%) di seluruh percakapan
+        preg_match_all('/\b\d+(?:[.,]\d+)?\s*(?:ml|mg|mcg|gram|gr|iu|%)\b/iu', $combined, $sizeMatches);
+        $sizeTokens = array_values(array_unique(array_map(
+            fn($s) => preg_replace('/\s+/u', '', mb_strtolower($s)),
+            $sizeMatches[0] ?? []
+        )));
+
+        // Ekstrak jumlah + satuan transaksi (prioritas dari turn terbaru ke terlama)
+        $qty = null;
+        $unit = null;
+        $unitExplicit = false;
+        $mlAsAmount = false;
+
+        $countUnitsPattern = 'pcs|pc|buah|biji|botol|btl|tablet|tab|kaplet|kapsul|kap|strip|str|tube|sachet|box|boks|dus|fls|vial|ampul|pot|roll|lembar|unit|botol\/pcs';
+
+        foreach (array_reverse($userTurns) as $idx => $turn) {
+            $t = mb_strtolower(preg_replace('/\s+/u', ' ', $turn));
+
+            // Jangan anggap nomor pilihan ("nomor 1", "no 2") sebagai quantity
+            $tWithoutSelection = preg_replace('/\b(?:no|nomor|nomer|pilih|pilihan|opsi|ke)\s*\.?\s*-?\s*\d+\b/iu', ' ', $t);
+
+            if (preg_match('/\b(\d+)\s*(' . $countUnitsPattern . ')\b/iu', $tWithoutSelection, $m)) {
+                $qty = (int) $m[1];
+                $unit = $this->normalizeStockUnit($m[2]);
+                $unitExplicit = true;
+                break;
+            }
+
+            // Jika user hanya menyebutkan satuan di follow-up (misal "botol" / "pcs") setelah sebelumnya menyebut angka
+            if ($unit === null && preg_match('/\b(' . $countUnitsPattern . ')\b/iu', $tWithoutSelection, $m)) {
+                $unit = $this->normalizeStockUnit($m[1]);
+                $unitExplicit = true;
+            }
+
+            // Deteksi kasus seperti "kurangi alkohol 50 ml" (user menyebut ml sebagai jumlah, bukan kemasan 100ml)
+            if (preg_match('/(?:sebanyak|sejumlah|qty|tambah(?:kan|in)?|kurang(?:i|kan|in)?)\s+(?:stok\s+)?(\d+)\s*ml\b/iu', $tWithoutSelection)) {
+                $mlAsAmount = true;
+            }
+
+            // Angka tanpa unit setelah kata kerja atau pada follow-up singkat
+            if ($qty === null && preg_match('/(?:sebanyak|jumlah|qty|tambah(?:kan|in)?|kurang(?:i|kan|in)?|restock|restok)\s*(?:stok\s*)?(\d+)\b(?!\s*(?:mg|ml|mcg|%|gram|gr|iu)\b)/iu', $tWithoutSelection, $m)) {
+                $qty = (int) $m[1];
+                continue;
+            }
+
+            if ($qty === null && $idx === 0 && preg_match('/(?:^|[,\s])(\d+)\s*$/u', trim($tWithoutSelection), $m)) {
+                $candidateNum = (int) $m[1];
+                if ($selectedCode === null || !preg_match('/^\s*\d+\s*$/u', trim($t))) {
+                    $qty = $candidateNum;
+                }
+            }
+        }
+
+        // Cek konfirmasi eksplisit ("ya", "iya", "benar", "betul", "oke", "ok") setelah klarifikasi
+        $confirmed = $prevPrompt !== null && (bool) preg_match('/\b(ya|iya|betul|benar|oke|ok|setuju|sesuai|yg\s+itu|yang\s+itu)\b/iu', $latest);
+
+        // Cocokkan kandidat obat
+        if ($selectedCode !== null) {
+            $candidates = $obat->filter(fn($item) => mb_strtoupper((string) ($item['kode'] ?? '')) === $selectedCode)->values();
+        } else {
+            $candidates = $this->findStockUpdateCandidates($userTurns, $sizeTokens, $prevCandidates, $obat);
+        }
+
+        return [
+            'action' => $action,
+            'qty' => $qty,
+            'unit' => $unit,
+            'unit_explicit' => $unitExplicit,
+            'ml_as_amount' => $mlAsAmount,
+            'size_tokens' => $sizeTokens,
+            'selected_code' => $selectedCode,
+            'confirmed' => $confirmed,
+            'candidates' => $candidates,
+            'combined' => $combined,
+        ];
+    }
+
+    private function extractPromptCandidateMap(?string $prevPrompt): array
+    {
+        if ($prevPrompt === null) {
+            return [];
+        }
+
+        $map = [];
+        if (preg_match_all('/^\s*(\d+)\.\s+\*\*\[([^\]]+)\]/imu', $prevPrompt, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $m) {
+                $map[(int) $m[1]] = mb_strtoupper(trim($m[2]));
+            }
+        }
+
+        return $map;
+    }
+
+    private function findStockUpdateCandidates(array $userTurns, array $sizeTokens, array $prevCandidates, Collection $obat): Collection
+    {
+        $combined = mb_strtolower(implode(' ', $userTurns));
+
+        // Jika ada daftar kandidat dari prompt sebelumnya, prioritaskan mencari di dalam daftar tersebut terlebih dahulu
+        $pool = $obat;
+        if (!empty($prevCandidates)) {
+            $codes = array_values($prevCandidates);
+            $narrowedPool = $obat->filter(fn($item) => in_array(mb_strtoupper((string) ($item['kode'] ?? '')), $codes, true))->values();
+            if ($narrowedPool->isNotEmpty()) {
+                $latestClean = $this->extractMedicineSearchTokens(end($userTurns) ?: '');
+                if (!empty($latestClean) || !empty($sizeTokens)) {
+                    $matchedInNarrow = $this->scoreAndFilterMedicineCandidates($narrowedPool, $latestClean, $sizeTokens);
+                    if ($matchedInNarrow->isNotEmpty()) {
+                        return $matchedInNarrow;
+                    }
+                }
+            }
+        }
+
+        $tokens = $this->extractMedicineSearchTokens($combined);
+        if (empty($tokens) && empty($sizeTokens)) {
+            return collect();
+        }
+
+        return $this->scoreAndFilterMedicineCandidates($pool, $tokens, $sizeTokens);
+    }
+
+    private function extractMedicineSearchTokens(string $text): array
+    {
+        $clean = mb_strtolower($text);
+        $clean = preg_replace('/\b(?:no|nomor|nomer|pilih|pilihan|opsi|ke)\s*\.?\s*-?\s*\d+\b/iu', ' ', $clean);
+        $clean = preg_replace('/\b\d+\s*(?:pcs|pc|buah|biji|botol|btl|tablet|tab|kaplet|kapsul|kap|strip|str|tube|sachet|box|boks|dus|fls|vial|ampul|pot|roll|lembar|unit)\b/iu', ' ', $clean);
+        $clean = preg_replace('/\b\d+(?:[.,]\d+)?\s*(?:ml|mg|mcg|gram|gr|iu|%)\b/iu', ' ', $clean);
+        $clean = preg_replace('/[^a-z0-9\s]/iu', ' ', $clean);
+
+        $stopwords = [
+            'tolong', 'mohon', 'minta', 'bantu', 'bisa', 'mau', 'ingin', 'akan', 'ajukan', 'pengajuan',
+            'tambah', 'tambahkan', 'tambahin', 'penambahan', 'nambah', 'restock', 'restok',
+            'kurang', 'kurangi', 'kurangkan', 'kurangin', 'pengurangan', 'potong', 'turunkan', 'turunin',
+            'update', 'ubah', 'edit', 'sesuaikan', 'penyesuaian', 'input', 'catat', 'set',
+            'stok', 'obat', 'data', 'database', 'apotek', 'di', 'ke', 'dari', 'untuk', 'dengan', 'yang', 'yg',
+            'ya', 'iya', 'betul', 'benar', 'oke', 'ok', 'setuju', 'sesuai', 'itu', 'ini', 'ada', 'lagi',
+            'sebanyak', 'sejumlah', 'jumlah', 'qty', 'berapa', 'dong', 'nih', 'nya', 'dan', 'atau', 'aja', 'saja',
+        ];
+
+        $words = preg_split('/\s+/u', trim($clean), -1, PREG_SPLIT_NO_EMPTY);
+        $filtered = [];
+
+        foreach ($words as $w) {
+            if (in_array($w, $stopwords, true)) {
+                continue;
+            }
+            if (is_numeric($w) || mb_strlen($w) < 2) {
+                continue;
+            }
+            $filtered[] = $w;
+        }
+
+        return array_values(array_unique($filtered));
+    }
+
+    private function scoreAndFilterMedicineCandidates(Collection $pool, array $tokens, array $sizeTokens): Collection
+    {
+        $scored = $pool->map(function ($item) use ($tokens, $sizeTokens) {
+            $namaRaw = mb_strtolower((string) $item['nama_obat']);
+            $namaCompact = preg_replace('/\s+/u', '', $namaRaw);
+            $kodeLower = mb_strtolower((string) ($item['kode'] ?? ''));
+
+            $tokenHits = 0;
+            $distinctTokenMatches = 0;
+            foreach ($tokens as $tok) {
+                if ($tok === $kodeLower) {
+                    $tokenHits += 5;
+                    $distinctTokenMatches++;
+                } elseif (preg_match('/\b' . preg_quote($tok, '/') . '\b/iu', $namaRaw)) {
+                    $tokenHits += 2;
+                    $distinctTokenMatches++;
+                } elseif (str_contains($namaRaw, $tok)) {
+                    $tokenHits += 1;
+                    $distinctTokenMatches++;
+                }
+            }
+
+            $sizeHits = 0;
+            foreach ($sizeTokens as $sz) {
+                if (str_contains($namaCompact, $sz)) {
+                    $sizeHits += 2;
+                }
+            }
+
+            if ($tokenHits === 0 && !empty($tokens)) {
+                return null;
+            }
+
+            if (!empty($sizeTokens) && $sizeHits === 0) {
+                return null;
+            }
+
+            // Jika user memberi beberapa kata (misal "ambroxol bernofarm"), utamakan yang cocok semua kata
+            return [
+                'item' => $item,
+                'score' => ($tokenHits * 10) + ($sizeHits * 8),
+                'matched_all_tokens' => count($tokens) > 0 && $distinctTokenMatches >= count($tokens),
+            ];
+        })->filter()->sortByDesc('score')->values();
+
+        if ($scored->isEmpty()) {
+            return collect();
+        }
+
+        $topScore = $scored->first()['score'];
+        $strictMatches = $scored->filter(fn($entry) => $entry['matched_all_tokens'])->values();
+
+        $selected = $strictMatches->isNotEmpty()
+            ? $strictMatches
+            : $scored->filter(fn($entry) => $entry['score'] >= ($topScore * 0.6))->values();
+
+        return $selected->pluck('item')->values();
+    }
+
+    private function normalizeStockUnit(string $raw): string
+    {
+        $u = mb_strtolower(trim($raw));
+        return match ($u) {
+            'pc' => 'pcs',
+            'btl' => 'botol',
+            'tab' => 'tablet',
+            'kap' => 'kaplet',
+            'str' => 'strip',
+            default => $u,
+        };
+    }
+
+    private function buildAmbiguousStockReply(Collection $candidates, string $actionLabel, ?int $qty, ?string $unit): string
+    {
+        $maxShow = 8;
+        $list = $candidates->take($maxShow)->values();
+        $lines = [];
+
+        foreach ($list as $idx => $item) {
+            $num = $idx + 1;
+            $satuan = $item['satuan'] ?: 'Unit';
+            $lines[] = "{$num}. **[{$item['kode']}] {$item['nama_obat']}**\n"
+                . "   • Satuan: **{$satuan}** | Stok Saat Ini: **{$item['stok']} {$satuan}**";
+        }
+
+        $extraNote = $candidates->count() > $maxShow
+            ? "\n*(Menampilkan {$maxShow} dari {$candidates->count()} obat yang cocok — ketik nama/ml/merek lebih spesifik untuk mempersempit.)*\n"
+            : '';
+
+        $qtyHint = $qty !== null
+            ? ($unit !== null
+                ? " (jumlah: **{$qty} {$unit}**)"
+                : " dan pastikan satuannya untuk **{$qty}** item (misal: **{$qty} botol** / **{$qty} pcs**)")
+            : ' beserta **jumlah & satuannya** (misal: `5 botol` / `10 tablet` / `3 pcs`)';
+
+        $sampleVerb = $actionLabel === 'pengurangan' ? 'kurangi' : 'tambah';
+
+        return self::STOCK_CLARIFICATION_HEADER . "\n\n"
+            . "Ditemukan beberapa varian obat yang cocok untuk **{$actionLabel} stok**:\n\n"
+            . implode("\n", $lines) . "\n"
+            . $extraNote . "\n"
+            . "Mohon spesifikasikan nomor atau varian obat yang mana (**berapa ml / mg / merek**){$qtyHint}.\n"
+            . "*Contoh:* `nomor 1, {$sampleVerb} 5 " . mb_strtolower($list->first()['satuan'] ?: 'pcs') . "` atau sebutkan `yang 60ml 5 botol`.";
+    }
+
+    private function medicineHasVariantMeasurement(string $namaObat): bool
+    {
+        return (bool) preg_match('/\b\d+(?:[.,]\d+)?\s*(?:ml|mg|mcg|iu|%)\b/iu', $namaObat);
+    }
+
+    private function extractVariantSpecLabel(string $namaObat): string
+    {
+        if (preg_match_all('/\b\d+(?:[.,]\d+)?\s*(?:ml|mg|mcg|iu|%)\b/iu', $namaObat, $m)) {
+            return implode(' / ', array_unique($m[0]));
+        }
+
+        return 'varian spesifik';
+    }
+
+    private function userSpecifiedVariantOrConfirmed(array $target, array $parsed): bool
+    {
+        if ($parsed['confirmed'] || $parsed['selected_code'] !== null) {
+            return true;
+        }
+
+        $namaCompact = preg_replace('/\s+/u', '', mb_strtolower((string) $target['nama_obat']));
+        foreach ($parsed['size_tokens'] as $sz) {
+            if (str_contains($namaCompact, $sz)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function getDataKategori(): Collection

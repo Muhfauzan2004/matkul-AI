@@ -329,6 +329,19 @@
         gap: 0.25rem;
         border: 1px solid rgba(16, 185, 129, 0.2);
     }
+
+    .quantity-badge-minus {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #b91c1c;
+        background: #fee2e2;
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
     
     .stok-level-indicator {
         display: inline-flex;
@@ -627,13 +640,14 @@
                     <th style="width: 120px;">Kode</th>
                     <th>Nama Obat</th>
                     <th>Kategori</th>
-                    <th style="text-align:center; width: 180px;">Jumlah Ditambahkan</th>
-                    <th>Catatan Restok</th>
-                    <th>Tanggal Restok</th>
+                    <th style="text-align:center; width: 180px;">Perubahan Stok</th>
+                    <th>Catatan Penyesuaian</th>
+                    <th>Tanggal Disetujui</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($stockAdditions as $addition)
+                @php $isReduction = $addition->jumlah < 0; @endphp
                 <tr>
                     <td><span class="kode-badge-premium">{{ $addition->obat->kode ?? '—' }}</span></td>
                     <td style="font-weight:700; color:var(--gray-800);">{{ $addition->obat->nama_obat ?? 'Obat Dihapus' }}</td>
@@ -641,9 +655,9 @@
                         <span class="category-badge-premium">{{ $addition->obat->kategori->nama_kategori ?? 'Umum' }}</span>
                     </td>
                     <td style="text-align:center;">
-                        <span class="quantity-badge-plus">
-                            <i class="fas fa-plus" style="font-size:0.7rem;"></i>{{ $addition->jumlah }}
-                            <span style="font-weight: 600; font-size:0.7rem; text-transform:lowercase; color: var(--success-dark); opacity: 1;">{{ $addition->obat->satuan ?? 'pcs' }}</span>
+                        <span class="{{ $isReduction ? 'quantity-badge-minus' : 'quantity-badge-plus' }}">
+                            <i class="fas {{ $isReduction ? 'fa-minus' : 'fa-plus' }}" style="font-size:0.7rem;"></i>{{ abs($addition->jumlah) }}
+                            <span style="font-weight: 600; font-size:0.7rem; text-transform:lowercase; color: {{ $isReduction ? '#b91c1c' : 'var(--success-dark)' }}; opacity: 1;">{{ $addition->obat->satuan ?? 'pcs' }}</span>
                         </span>
                     </td>
                     <td style="font-size:0.82rem; color:var(--gray-600); max-width:280px; white-space:normal; line-height:1.5;">{{ $addition->catatan ?: '—' }}</td>

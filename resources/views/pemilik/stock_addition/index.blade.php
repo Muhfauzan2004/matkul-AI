@@ -8,8 +8,8 @@
 
 <div class="page-header">
     <div>
-        <div class="page-title">Persetujuan <span>Stok Masuk</span></div>
-        <div style="font-size:0.88rem;color:var(--gray-500);margin-top:4px;font-weight:500;">Konfirmasi atau tolak pengajuan penambahan stok obat yang diajukan oleh admin</div>
+        <div class="page-title">Persetujuan <span>Stok Obat</span></div>
+        <div style="font-size:0.88rem;color:var(--gray-500);margin-top:4px;font-weight:500;">Konfirmasi atau tolak pengajuan penambahan &amp; pengurangan stok obat dari admin atau PharmAI</div>
     </div>
     @php $pendingCount = \App\Models\StockAddition::where('status', 'pending')->count(); @endphp
     @if($pendingCount > 0)
@@ -64,9 +64,9 @@
             <thead>
                 <tr>
                     <th>Tanggal Pengajuan</th>
-                    <th>Detail Obat & Stok Saat Ini</th>
-                    <th>Stok Ditambahkan</th>
-                    <th>Catatan Admin</th>
+                    <th>Detail Obat &amp; Stok Saat Ini</th>
+                    <th>Perubahan Stok</th>
+                    <th>Catatan</th>
                     <th>Status Pengajuan</th>
                     <th style="width:110px; text-align:center;">Tindakan</th>
                 </tr>
@@ -87,11 +87,14 @@
                         </div>
                     </td>
                     <td>
-                        <div class="qty-badge">
-                            <i class="fas fa-plus" style="font-size:0.7rem;color:var(--primary);opacity:0.8;"></i>
-                            {{ $item->jumlah }}
+                        @php $isReduction = $item->jumlah < 0; @endphp
+                        <div class="qty-badge" style="{{ $isReduction ? 'background:#fee2e2;color:#b91c1c;border-color:#fecaca;' : '' }}">
+                            <i class="fas {{ $isReduction ? 'fa-minus' : 'fa-plus' }}" style="font-size:0.7rem;color:{{ $isReduction ? '#dc2626' : 'var(--primary)' }};opacity:0.9;"></i>
+                            {{ abs($item->jumlah) }}
                         </div>
-                        <div style="font-size:0.75rem;color:var(--gray-500);margin-top:2px;font-weight:600;">{{ $item->obat->satuan ?? '' }}</div>
+                        <div style="font-size:0.72rem;color:{{ $isReduction ? '#dc2626' : 'var(--gray-500)' }};margin-top:2px;font-weight:600;">
+                            {{ $isReduction ? 'Pengurangan' : 'Penambahan' }} &middot; {{ $item->obat->satuan ?? '' }}
+                        </div>
                     </td>
                     <td>
                         <div class="catatan-cell">{{ $item->catatan ?: '— Tidak ada catatan.' }}</div>
@@ -116,13 +119,13 @@
                             <div style="display:flex;gap:0.5rem;justify-content:center;align-items:center;">
                                 <form action="{{ route('pemilik.stock.approve', $item) }}" method="POST">
                                     @csrf @method('PUT')
-                                    <button type="submit" class="btn-action-approve" title="Setujui Pengajuan" onclick="return confirm('Setujui penambahan stok {{ addslashes($item->obat->nama_obat ?? '') }}?')">
+                                    <button type="submit" class="btn-action-approve" title="Setujui Pengajuan" onclick="return confirm('Setujui {{ $item->jumlah < 0 ? 'pengurangan' : 'penambahan' }} stok {{ addslashes($item->obat->nama_obat ?? '') }}?')">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </form>
                                 <form action="{{ route('pemilik.stock.reject', $item) }}" method="POST">
                                     @csrf @method('PUT')
-                                    <button type="submit" class="btn-action-reject" title="Tolak Pengajuan" onclick="return confirm('Tolak penambahan stok ini?')">
+                                    <button type="submit" class="btn-action-reject" title="Tolak Pengajuan" onclick="return confirm('Tolak pengajuan stok ini?')">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </form>
