@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Catatan Penjualan')
+@section('title', '')
 {{-- Shared CSS loaded via public/css/admin/shared.css --}}
 @section('content')
 

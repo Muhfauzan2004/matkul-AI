@@ -1,5 +1,5 @@
 @extends('layouts.pemilik')
-@section('title', 'Kelola Admin')
+@section('title', '')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/pemilik/user-index.css') }}">
 @endpush

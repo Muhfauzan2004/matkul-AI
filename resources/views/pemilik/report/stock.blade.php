@@ -1,5 +1,5 @@
 @extends('layouts.pemilik')
-@section('title', 'Laporan Stok & Inventaris Masuk')
+@section('title', '')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/admin/report.css') }}">
 <style>

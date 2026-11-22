@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Penambahan Stok Obat')
+@section('title', '')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/admin/stock.css') }}">
 @endpush

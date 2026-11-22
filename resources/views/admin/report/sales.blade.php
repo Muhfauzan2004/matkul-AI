@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Laporan Penjualan')
+@section('title', '')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/admin/report.css') }}">
 @endpush

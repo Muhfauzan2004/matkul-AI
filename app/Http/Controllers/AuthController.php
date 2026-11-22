@@ -101,11 +101,15 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('admin.user.index');
+        }
+
         if ($user->isPemilik()) {
             return redirect()->route('pemilik.dashboard');
         }
 
-        if ($user->hasAdminAccess()) {
+        if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
 

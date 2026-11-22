@@ -1,5 +1,5 @@
 @extends('layouts.pemilik')
-@section('title', 'Laporan Pendapatan')
+@section('title', '')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/pemilik/report-income.css') }}">
 @endpush

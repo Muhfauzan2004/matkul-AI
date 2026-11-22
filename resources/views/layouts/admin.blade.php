@@ -314,16 +314,17 @@
     {{-- SIDEBAR --}}
     <aside class="sidebar">
         <div class="sidebar-header">
-            <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
+            <a href="{{ auth()->user()->isSuperAdmin() ? route('admin.user.index') : route('admin.dashboard') }}" class="sidebar-brand">
                 <i class="fas fa-mortar-pestle"></i>
                 <span class="sidebar-brand-text">
                     APOTEK ITU TOKO OBAT
-                    <small style="display:block;font-size:0.62rem;font-weight:600;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;">Admin Panel</small>
+                    <small style="display:block;font-size:0.62rem;font-weight:600;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Admin Panel' }}</small>
                 </span>
             </a>
         </div>
 
         <nav class="sidebar-nav">
+            @if(!auth()->user()->isSuperAdmin())
             <div class="sidebar-label">Menu Utama</div>
             <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" title="Dashboard">
                 <i class="fas fa-tachometer-alt"></i>
@@ -371,12 +372,13 @@
                 <i class="fas fa-boxes"></i>
                 <span class="sidebar-link-text">Laporan Stok Masuk</span>
             </a>
+            @endif
 
             @if(auth()->user()->isSuperAdmin())
             <div class="sidebar-label">Super Admin</div>
-            <a href="{{ route('admin.user.index') }}" class="sidebar-link {{ request()->routeIs('admin.user.*') ? 'active' : '' }}" title="Kelola User">
+            <a href="{{ route('admin.user.index') }}" class="sidebar-link {{ request()->routeIs('admin.user.*') ? 'active' : '' }}" title="Kelola User & Role">
                 <i class="fas fa-users-cog"></i>
-                <span class="sidebar-link-text">Kelola User</span>
+                <span class="sidebar-link-text">Kelola User & Role</span>
             </a>
             @endif
         </nav>
@@ -611,7 +613,7 @@
 
     @stack('scripts')
 
-    @if(auth()->check())
+    @if(auth()->check() && !auth()->user()->isSuperAdmin())
         @include('components.ai-button')
     @endif
 

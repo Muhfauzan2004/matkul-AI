@@ -10,8 +10,8 @@
         <div class="page-title">Edit <span>Profil</span></div>
         <div class="page-subtitle">Kelola informasi akun dan keamanan Anda</div>
     </div>
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline btn-sm">
-        <i class="fas fa-home"></i> Dashboard
+    <a href="{{ auth()->user()->isSuperAdmin() ? route('admin.user.index') : route('admin.dashboard') }}" class="btn btn-outline btn-sm">
+        <i class="fas {{ auth()->user()->isSuperAdmin() ? 'fa-users-cog' : 'fa-home' }}"></i> {{ auth()->user()->isSuperAdmin() ? 'Kelola User' : 'Dashboard' }}
     </a>
 </div>
 

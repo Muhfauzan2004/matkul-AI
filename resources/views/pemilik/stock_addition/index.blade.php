@@ -1,5 +1,5 @@
 @extends('layouts.pemilik')
-@section('title', 'Persetujuan Stok Masuk')
+@section('title', '')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/pemilik/stock-addition-index.css') }}">
 @endpush

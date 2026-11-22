@@ -24,29 +24,31 @@ Route::get('/', [AuthController::class, 'showLogin']);
 Route::middleware('auth')->group(function () {
 
    
-    // AI Assistant
-    Route::get('/ai/chat', function () {
-        if (request()->has('fullscreen')) {
-            return view('ai.chat');
-        }
-        $role = auth()->user()?->role;
-        if ($role === 'pemilik') {
-            return redirect()->route('pemilik.dashboard', ['open_ai' => 1]);
-        }
-        return redirect()->route('admin.dashboard', ['open_ai' => 1]);
-    })->name('ai.chat.page');
+    // AI Assistant (khusus Admin & Pemilik)
+    Route::middleware('role:admin,pemilik')->group(function () {
+        Route::get('/ai/chat', function () {
+            if (request()->has('fullscreen')) {
+                return view('ai.chat');
+            }
+            $role = auth()->user()?->role;
+            if ($role === 'pemilik') {
+                return redirect()->route('pemilik.dashboard', ['open_ai' => 1]);
+            }
+            return redirect()->route('admin.dashboard', ['open_ai' => 1]);
+        })->name('ai.chat.page');
 
-    Route::post('/ai/chat', [AIController::class, 'chat'])
-        ->name('ai.chat');
+        Route::post('/ai/chat', [AIController::class, 'chat'])
+            ->name('ai.chat');
 
-    Route::get('/ai/history', [AIController::class, 'history'])
-        ->name('ai.history');
+        Route::get('/ai/history', [AIController::class, 'history'])
+            ->name('ai.history');
 
-    Route::delete('/ai/history', [AIController::class, 'clearHistory'])
-        ->name('ai.history.clear');
+        Route::delete('/ai/history', [AIController::class, 'clearHistory'])
+            ->name('ai.history.clear');
 
-    Route::delete('/ai/history/{sessionId}', [AIController::class, 'deleteSession'])
-        ->name('ai.history.delete-session');
+        Route::delete('/ai/history/{sessionId}', [AIController::class, 'deleteSession'])
+            ->name('ai.history.delete-session');
+    });
 
 
     // Profile
@@ -55,41 +57,44 @@ Route::middleware('auth')->group(function () {
     Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
-// ==================== ADMIN ====================
+// ==================== ADMIN & SUPER ADMIN ====================
 Route::middleware(['auth', 'role:super_admin,admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Profile Management
+    // Profile Management (Super Admin & Admin)
     Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profil/password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.password');
 
-    // Obat Management
-    Route::get('obat/export/excel', [ObatController::class, 'exportExcel'])->name('obat.export');
-    Route::post('obat/import', [ObatController::class, 'importExcel'])->name('obat.import');
-    Route::resource('obat', ObatController::class);
-
-    // Kategori Management
-    Route::resource('kategori', KategoriController::class)->except(['show']);
-
-    // Order Management (Catatan Penjualan)
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-
-    // Laporan Penjualan
-    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');
-    Route::get('/reports/stock', [\App\Http\Controllers\Admin\ReportController::class, 'stock'])->name('reports.stock');
-
-    // Penambahan Stok
-    Route::get('/stock', [\App\Http\Controllers\Admin\StockController::class, 'index'])->name('stock.index');
-    Route::post('/stock', [\App\Http\Controllers\Admin\StockController::class, 'add'])->name('stock.add');
-
-    // User Management (Super Admin only)
+    // User & Role Management (Super Admin ONLY)
     Route::middleware('role:super_admin')->group(function () {
         Route::resource('user', UserController::class)->except(['show']);
+    });
+
+    // Fitur Operasional Apotek (Admin ONLY — Super Admin diblokir)
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Obat Management
+        Route::get('obat/export/excel', [ObatController::class, 'exportExcel'])->name('obat.export');
+        Route::post('obat/import', [ObatController::class, 'importExcel'])->name('obat.import');
+        Route::resource('obat', ObatController::class);
+
+        // Kategori Management
+        Route::resource('kategori', KategoriController::class)->except(['show']);
+
+        // Order Management (Catatan Penjualan)
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+        // Laporan Penjualan & Stok
+        Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');
+        Route::get('/reports/stock', [\App\Http\Controllers\Admin\ReportController::class, 'stock'])->name('reports.stock');
+
+        // Penambahan Stok
+        Route::get('/stock', [\App\Http\Controllers\Admin\StockController::class, 'index'])->name('stock.index');
+        Route::post('/stock', [\App\Http\Controllers\Admin\StockController::class, 'add'])->name('stock.add');
     });
 });
 
