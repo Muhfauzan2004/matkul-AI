@@ -162,6 +162,11 @@ class AIController extends Controller
             return $this->handleCategoryMedicines($user, $kategoriCocok, $obat);
         }
 
+        // 10b. Cek Pertanyaan Ketersediaan Nama Obat yang Tidak Ada di Database (misal: "apa ada paramex?")
+        if (empty($hasilGejala['keluhan']) && $this->isMedicineAvailabilityInquiry($teks)) {
+            return $this->handleMissingMedicineAvailability($user, $teks, $obat);
+        }
+
         // Jika ada keluhan yang tersisa tapi ada nama obat yang spesifik ditanyakan bersama keluhan
         if (!empty($hasilGejala['keluhan'])) {
             return $this->handleSymptomRecommendation($user, $hasilGejala);
@@ -1009,7 +1014,77 @@ class AIController extends Controller
         if ($this->isMedicineDosageOrUsageQuestion($teks)) {
             return false;
         }
-        return (bool) preg_match('/(stok|harga|tersedia|ready|habis|kosong|harganya|berapa\s+(harga|stok|jumlahnya|biaya)|masih\s+ada|ada\s+nggak|punya|jual|beli)/u', $teks);
+        return (bool) preg_match('/(stok|harga|tersedia|ready|habis|kosong|harganya|berapa\s+(harga|stok|jumlahnya|biaya)|masih\s+ada|(?:apa|apakah)\s+ada|ada\s+nggak|ada\s+gak|ada\s+ga|punya|jual|beli)/u', $teks);
+    }
+
+    private function isMedicineAvailabilityInquiry(string $teks): bool
+    {
+        if ($this->isMedicineDosageOrUsageQuestion($teks) || $this->isMedicineDetailQuestion($teks)) {
+            return false;
+        }
+
+        return (bool) preg_match('/\b(?:apa(?:kah)?\s+ada|masih\s+ada|ada\s+(?:stok\s+)?obat|ada\s+[a-z0-9\-]{3,}(?:\s+(?:ga|gak|nggak|tidak|kah))?\s*[?!.]*$|stok\s+[a-z0-9\-]{3,}|jual\s+[a-z0-9\-]{3,}|tersedia\s+[a-z0-9\-]{3,})\b/iu', $teks);
+    }
+
+    private function handleMissingMedicineAvailability($user, string $teks, Collection $obat)
+    {
+        $clean = preg_replace('/\b(apakah|apa|masih|ada|tersedia|ready|punya|jual|beli|stok|obat|produk|merek|merk|yang|yg|di\s+apotek|disini|di\s+sini|ya|dong|kak|min|bang|pak|bu|ga|gak|nggak|tidak|kah)\b/iu', ' ', $teks);
+        $clean = trim(preg_replace('/[^a-z0-9\s\-]/iu', ' ', $clean));
+        $clean = preg_replace('/\s+/u', ' ', $clean);
+        $namaDicari = $clean !== '' ? ucwords($clean) : 'obat yang ditanyakan';
+
+        // Cek apakah user menanyakan merek umum yang punya padanan zat aktif di database
+        $keyword = mb_strtolower($clean);
+        $alternatifTokens = match (true) {
+            str_contains($keyword, 'paramex'),
+            str_contains($keyword, 'panadol'),
+            str_contains($keyword, 'bodrex'),
+            str_contains($keyword, 'sanmol'),
+            str_contains($keyword, 'biogesic') => ['paracetamol', 'ibuprofen', 'asam mefenamat'],
+            str_contains($keyword, 'promag'),
+            str_contains($keyword, 'mylanta'),
+            str_contains($keyword, 'polysilane') => ['antasida', 'omeprazole', 'ranitidine'],
+            str_contains($keyword, 'obh'),
+            str_contains($keyword, 'woods'),
+            str_contains($keyword, 'komix'),
+            str_contains($keyword, 'vicks'),
+            str_contains($keyword, 'bisolvon') => ['ambroxol', 'bromhexine', 'acetylcisteine'],
+            str_contains($keyword, 'betadine') => ['povidone', 'rivanol', 'alkohol'],
+            str_contains($keyword, 'incidal'),
+            str_contains($keyword, 'ctm') => ['cetirizine', 'loratadine'],
+            str_contains($keyword, 'diapet'),
+            str_contains($keyword, 'diatab'),
+            str_contains($keyword, 'entrostop') => ['attapulgite', 'loperamide', 'oralit'],
+            default => [],
+        };
+
+        $alternatif = collect();
+        if (!empty($alternatifTokens)) {
+            $alternatif = $obat->filter(function ($item) use ($alternatifTokens) {
+                $nama = mb_strtolower($item['nama_obat']);
+                foreach ($alternatifTokens as $tok) {
+                    if (str_contains($nama, $tok) && $item['stok'] > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            })->take(4)->values();
+        }
+
+        $reply = "Mohon maaf, produk **{$namaDicari}** saat ini **tidak tersedia / belum terdaftar** di inventaris **APOTEK ITU TOKO OBAT**.";
+
+        if ($alternatif->isNotEmpty()) {
+            $reply .= "\n\n💊 **Alternatif Obat Tersedia dengan Kandungan/Fungsi Serupa:**\n";
+            foreach ($alternatif as $idx => $item) {
+                $harga = is_numeric($item['harga_umum']) ? 'Rp ' . number_format($item['harga_umum'], 0, ',', '.') : 'Rp -';
+                $reply .= ($idx + 1) . ". **{$item['nama_obat']}** (`{$item['kode']}`) — Stok: **{$item['stok']} {$item['satuan']}** | {$harga}\n";
+            }
+            $reply .= "\nSilakan beri tahu jika ingin menanyakan aturan pakai atau detail salah satu alternatif di atas.";
+        } else {
+            $reply .= "\n\n💡 Anda bisa menanyakan nama zat aktifnya (misal: *Paracetamol*, *Ambroxol*, *Antasida*) atau ketik **daftar obat tersedia** untuk melihat stok yang ada saat ini.";
+        }
+
+        return $this->sendReply($user, $reply);
     }
 
     private function isMedicineDetailQuestion(string $teks): bool
@@ -1140,9 +1215,9 @@ class AIController extends Controller
         if ($provider === 'gemini' && !empty(env('GEMINI_API_KEY'))) {
             $rawApiKeys = env('GEMINI_API_KEY');
             $apiKeys = array_values(array_filter(array_map('trim', explode(',', $rawApiKeys))));
-            $modelList = array_values(array_filter(array_map('trim', explode(',', config('services.ai.gemini.model', env('GEMINI_MODEL', 'gemini-3.5-flash-lite,gemini-3.5-flash,gemini-3-flash-preview,gemini-2.0-flash,gemini-1.5-flash'))))));
+            $modelList = array_values(array_filter(array_map('trim', explode(',', config('services.ai.gemini.model', env('GEMINI_MODEL', 'gemini-3.5-flash-lite,gemini-3.5-flash,gemini-3-flash-preview'))))));
             if (empty($modelList)) {
-                $modelList = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+                $modelList = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3-flash-preview'];
             }
 
             // Sertakan konteks obat agar Gemini merekomendasikan obat yang nyata ada di apotek
@@ -1949,6 +2024,10 @@ class AIController extends Controller
 
     private function isHealthOrMedicalQuery(string $teks, ?Collection $riwayat = null): bool
     {
+        if ($this->isStockOrPriceQuestion($teks) || $this->isMedicineAvailabilityInquiry($teks)) {
+            return false;
+        }
+
         // 1. Cek langsung teks sekarang
         $isMatchTeks = (bool) preg_match(
             '/(?:luka|sobek|bakar|tusuk|memar|lebam|lecet|berdarah|darah|sayat|tergores|knalpot|paku|jarum|kaca|mimisan|p3k|'
@@ -1956,7 +2035,7 @@ class AIController extends Controller
             . 'migrain|denyut|kesemutan|mati\s*rasa|panas|meriang|dingin|menggigil|mual|muntah|lambung|maag|gerd|ulu\s*hati|'
             . 'perut|kembung|begah|diare|mencret|bab|sembelit|konstipasi|wasir|ambien|batuk|pilek|flu|bersin|tenggorokan|'
             . 'sesak|asma|hidung|serak|radang|amandel|sariawan|kepala|mata|gigi|gusi|telinga|pinggang|punggung|dada|kaki|'
-            . 'tangan|lutut|kulit|gatal|alergi|biduran|ruam|obat|sembuh|dosis|minum|sembuhkan|mengobati|penyakit|gejala|'
+            . 'tangan|lutut|kulit|gatal|alergi|biduran|ruam|sembuh|dosis|minum|sembuhkan|mengobati|penyakit|gejala|'
             . 'infeksi|demam|pertolongan\s*pertama|recovery|sembuhnya|berapa\s*lama|berapa\s*hari|kapan\s*sembuh)/u',
             $teks
         );
@@ -1965,10 +2044,11 @@ class AIController extends Controller
             return true;
         }
 
-        // 2. Jika riwayat percakapan sebelumnya sedang membahas kesehatan/keluhan luka
-        if ($riwayat && $riwayat->isNotEmpty()) {
+        // 2. Jika user bertanya lanjutan di tengah konsultasi luka/keluhan sebelumnya
+        $isFollowUpPhrasing = (bool) preg_match('/\b(?:berapa\s*lama|kapan|caranya|bagaimana|gimana|kompres|boleh|pantangan|recovery|sembuhnya|bahaya)\b/iu', $teks);
+        if ($isFollowUpPhrasing && $riwayat && $riwayat->isNotEmpty()) {
             $pesanTerakhir = mb_strtolower($riwayat->take(-4)->pluck('content')->implode(' '));
-            if (preg_match('/(?:luka|memar|lebam|sobek|bakar|nyeri|sakit|demam|pusing|mual|batuk|flu|obat|bengkak)/ui', $pesanTerakhir)) {
+            if (preg_match('/(?:luka|memar|lebam|sobek|bakar|nyeri|sakit|demam|pusing|mual|batuk|flu|bengkak)/ui', $pesanTerakhir)) {
                 return true;
             }
         }
