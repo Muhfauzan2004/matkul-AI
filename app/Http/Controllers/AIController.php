@@ -27,7 +27,7 @@ class AIController extends Controller
 
     public function chat(Request $request)
     {
-        set_time_limit(60);
+        set_time_limit(90);
 
         $request->validate([
             'message' => 'required|string|max:2000',
@@ -69,6 +69,13 @@ class AIController extends Controller
             'session_id' => $sessionId,
             'role' => 'user',
             'content' => $pertanyaan,
+        ]);
+
+        Log::info('PharmAI Chat Request', [
+            'user_id' => $user->id,
+            'role' => $user->role,
+            'session_id' => $sessionId,
+            'message' => mb_substr($pertanyaan, 0, 200),
         ]);
 
         // 1. Prioritas Nama User
@@ -144,6 +151,12 @@ class AIController extends Controller
         // 9. Prioritas Pencarian Obat Spesifik (Nama Obat, Stok, Dosis, Khasiat)
         $obatCocok = $this->findMedicineInMessage($teks, $obat);
         if ($obatCocok->isNotEmpty()) {
+            Log::info('PharmAI Medicine Found', [
+                'query' => $pertanyaan,
+                'matched_count' => $obatCocok->count(),
+                'first_match' => $obatCocok->first()['nama_obat'] ?? null,
+                'stok' => $obatCocok->first()['stok'] ?? null,
+            ]);
             if ($this->isMedicineDosageOrUsageQuestion($teks)) {
                 return $this->handleMedicineUsage($user, $obatCocok, $teks);
             }
@@ -1084,6 +1097,12 @@ class AIController extends Controller
             $reply .= "\n\n💡 Anda bisa menanyakan nama zat aktifnya (misal: *Paracetamol*, *Ambroxol*, *Antasida*) atau ketik **daftar obat tersedia** untuk melihat stok yang ada saat ini.";
         }
 
+        Log::info('PharmAI Medicine Not Found', [
+            'query' => $teks,
+            'searched_name' => $namaDicari,
+            'alternatives_count' => $alternatif->count(),
+        ]);
+
         return $this->sendReply($user, $reply);
     }
 
@@ -1215,9 +1234,9 @@ class AIController extends Controller
         if ($provider === 'gemini' && !empty(env('GEMINI_API_KEY'))) {
             $rawApiKeys = env('GEMINI_API_KEY');
             $apiKeys = array_values(array_filter(array_map('trim', explode(',', $rawApiKeys))));
-            $modelList = array_values(array_filter(array_map('trim', explode(',', config('services.ai.gemini.model', env('GEMINI_MODEL', 'gemini-3.5-flash-lite,gemini-3.5-flash,gemini-3-flash-preview'))))));
+            $modelList = array_values(array_filter(array_map('trim', explode(',', config('services.ai.gemini.model', env('GEMINI_MODEL', 'gemini-3.5-flash-lite,gemini-3-flash-preview,gemini-3.6-flash,gemini-3.5-flash'))))));
             if (empty($modelList)) {
-                $modelList = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3-flash-preview'];
+                $modelList = ['gemini-3.5-flash-lite', 'gemini-3-flash-preview', 'gemini-3.6-flash', 'gemini-3.5-flash'];
             }
 
             // Sertakan konteks obat agar Gemini merekomendasikan obat yang nyata ada di apotek
@@ -1234,32 +1253,36 @@ class AIController extends Controller
                 . "4. Berikan edukasi medis terstruktur: langkah perawatan mandiri yang aman, durasi penyembuhan yang wajar, hal yang tidak boleh dilakukan, serta tanda bahaya kapan harus ke dokter.\n"
                 . "5. Format jawaban rapi dengan poin/bullet dalam Bahasa Indonesia.";
 
-            // Susun history percakapan multi-turn untuk Gemini API
+            // Susun history percakapan multi-turn untuk Gemini API (alternating user/model yang valid)
             $contents = [];
             $historyItems = $riwayat ? $riwayat->take(-6)->values() : collect();
 
-            if ($historyItems->isEmpty()) {
-                $contents[] = [
-                    'role' => 'user',
-                    'parts' => [['text' => "{$systemInstruction}\n\nPertanyaan Pengguna: {$teks}"]]
-                ];
-            } else {
-                $isFirst = true;
-                foreach ($historyItems as $msg) {
-                    $role = ($msg->role === 'assistant') ? 'model' : 'user';
-                    $content = $msg->content;
-                    if ($isFirst && $role === 'user') {
-                        $content = "{$systemInstruction}\n\nPercakapan sebelumnya:\nUser: {$content}";
-                        $isFirst = false;
-                    }
-                    $contents[] = [
-                        'role' => $role,
-                        'parts' => [['text' => $content]]
-                    ];
+            foreach ($historyItems as $msg) {
+                $role = ($msg->role === 'assistant') ? 'model' : 'user';
+                $content = trim((string) $msg->content);
+                if ($content === '') {
+                    continue;
+                }
+                // Gemini API mensyaratkan giliran pertama adalah 'user'
+                if (empty($contents) && $role !== 'user') {
+                    continue;
+                }
+                if (!empty($contents) && $contents[array_key_last($contents)]['role'] === $role) {
+                    $contents[array_key_last($contents)]['parts'][0]['text'] .= "\n" . $content;
+                    continue;
                 }
                 $contents[] = [
+                    'role' => $role,
+                    'parts' => [['text' => $content]],
+                ];
+            }
+
+            if (!empty($contents) && $contents[array_key_last($contents)]['role'] === 'user') {
+                $contents[array_key_last($contents)]['parts'][0]['text'] .= "\n" . $teks;
+            } else {
+                $contents[] = [
                     'role' => 'user',
-                    'parts' => [['text' => $teks]]
+                    'parts' => [['text' => $teks]],
                 ];
             }
 
@@ -1270,18 +1293,36 @@ class AIController extends Controller
 
                     try {
                         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
-                        $response = Http::timeout(6)->post($url, [
+                        $response = Http::connectTimeout(5)->timeout(20)->post($url, [
+                            'systemInstruction' => [
+                                'parts' => [['text' => $systemInstruction]],
+                            ],
                             'contents' => $contents,
                             'generationConfig' => [
                                 'temperature' => 0.7,
-                                'maxOutputTokens' => 700,
-                            ]
+                                'maxOutputTokens' => 4096,
+                            ],
                         ]);
 
                         if ($response->successful()) {
-                            $reply = $response->json('candidates.0.content.parts.0.text');
-                            if (is_string($reply) && trim($reply) !== '') {
-                                return trim($reply);
+                            $parts = $response->json('candidates.0.content.parts') ?? [];
+                            $finishReason = $response->json('candidates.0.finishReason');
+                            $replyText = collect($parts)
+                                ->reject(fn($p) => !empty($p['thought']))
+                                ->pluck('text')
+                                ->filter(fn($t) => is_string($t) && trim($t) !== '')
+                                ->implode('');
+
+                            if (trim($replyText) !== '') {
+                                Log::info("Gemini API success [{$model}]", [
+                                    'finish_reason' => $finishReason,
+                                    'reply_len' => mb_strlen(trim($replyText)),
+                                ]);
+                                if ($finishReason === 'MAX_TOKENS' && mb_strlen(trim($replyText)) < 450) {
+                                    Log::warning("Gemini response truncated early [{$model}], trying next fallback.");
+                                    continue;
+                                }
+                                return trim($replyText);
                             }
                         } else {
                             Log::warning("Gemini API non-200 [{$model}]: " . substr($response->body(), 0, 200));
@@ -2036,7 +2077,7 @@ class AIController extends Controller
             . 'perut|kembung|begah|diare|mencret|bab|sembelit|konstipasi|wasir|ambien|batuk|pilek|flu|bersin|tenggorokan|'
             . 'sesak|asma|hidung|serak|radang|amandel|sariawan|kepala|mata|gigi|gusi|telinga|pinggang|punggung|dada|kaki|'
             . 'tangan|lutut|kulit|gatal|alergi|biduran|ruam|sembuh|dosis|minum|sembuhkan|mengobati|penyakit|gejala|'
-            . 'infeksi|demam|pertolongan\s*pertama|recovery|sembuhnya|berapa\s*lama|berapa\s*hari|kapan\s*sembuh)/u',
+            . 'infeksi|demam|antibiotik|analgesik|antivirus|antijamur|antihistamin|suplemen|vitamin|efek\s*samping|interaksi|kontraindikasi|pertolongan\s*pertama|recovery|sembuhnya|berapa\s*lama|berapa\s*hari|kapan\s*sembuh)/u',
             $teks
         );
 
@@ -2113,6 +2154,12 @@ class AIController extends Controller
 
     protected function sendReply($user, string $reply)
     {
+        Log::info('PharmAI Reply Sent', [
+            'user_id' => $user->id,
+            'session_id' => $this->activeSessionId,
+            'reply_preview' => mb_substr(preg_replace('/\s+/u', ' ', $reply), 0, 160),
+        ]);
+
         try {
             AiMessage::create([
                 'user_id' => $user->id,

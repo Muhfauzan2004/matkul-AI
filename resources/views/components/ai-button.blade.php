@@ -1008,6 +1008,15 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
 
+            // Horizontal rule ---
+            s = s.replace(/^\s*-{3,}\s*$/gm, '<hr style="border:none;border-top:1px solid rgba(0,0,0,0.1);margin:8px 0;">');
+            // Headings ### or ##
+            s = s.replace(/^###\s+(.+)$/gm, '<div style="font-weight:700;font-size:0.95rem;margin:8px 0 4px;">$1</div>');
+            s = s.replace(/^##\s+(.+)$/gm, '<div style="font-weight:800;font-size:1rem;margin:8px 0 4px;">$1</div>');
+            // Inline code `code`
+            s = s.replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:0.85em;">$1</code>');
+            // Bullet list (* or -) at line start -> clean bullet dot (before *italic* parsing)
+            s = s.replace(/^\s*[-*]\s+/gm, '• ');
             // Bold **text**
             s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             // Italic *text*
