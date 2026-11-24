@@ -36,15 +36,10 @@ return [
     ],
 
     'ai' => [
-        'provider' => env('AI_PROVIDER', 'deepseek'),
-        'deepseek' => [
-            'key' => env('DEEPSEEK_API_KEY'),
-            'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
-            'url' => env('DEEPSEEK_URL', 'https://api.deepseek.com/chat/completions'),
-        ],
+        'provider' => env('AI_PROVIDER', 'gemini'),
         'gemini' => [
             'key' => env('GEMINI_API_KEY'),
-            'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+            'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite,gemini-3-flash-preview,gemini-3.6-flash,gemini-3.5-flash'),
         ],
         'ollama' => [
             'url' => env('OLLAMA_URL', 'http://127.0.0.1:11434/api/chat'),

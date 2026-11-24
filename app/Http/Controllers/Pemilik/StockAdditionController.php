@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Pemilik;
 use App\Http\Controllers\Controller;
 use App\Models\Obat;
 use App\Models\StockAddition;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class StockAdditionController extends Controller

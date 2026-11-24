@@ -26,17 +26,6 @@ Route::middleware('auth')->group(function () {
    
     // AI Assistant (khusus Admin & Pemilik)
     Route::middleware('role:admin,pemilik')->group(function () {
-        Route::get('/ai/chat', function () {
-            if (request()->has('fullscreen')) {
-                return view('ai.chat');
-            }
-            $role = auth()->user()?->role;
-            if ($role === 'pemilik') {
-                return redirect()->route('pemilik.dashboard', ['open_ai' => 1]);
-            }
-            return redirect()->route('admin.dashboard', ['open_ai' => 1]);
-        })->name('ai.chat.page');
-
         Route::post('/ai/chat', [AIController::class, 'chat'])
             ->name('ai.chat');
 

@@ -9,6 +9,8 @@
 
 {{-- RIGHT-SIDE AI DRAWER PANEL (MUNCUL DI SEBELAH KANAN DASHBOARD) --}}
 <aside class="ai-drawer" id="aiDrawer" aria-label="PharmAI Panel">
+    <!-- Handle Resizer Sisi Kiri (Geser ke kiri untuk memperlebar, ke kanan untuk mengecilkan) -->
+    <div class="ai-drawer-resizer" id="aiDrawerResizer" title="Geser kiri / kanan untuk ubah lebar panel (klik ganda untuk reset)"></div>
     <!-- Header Panel Utama -->
     <div class="ai-drawer-header">
         <div class="ai-drawer-brand">
@@ -26,10 +28,6 @@
             <button type="button" class="ai-icon-btn" onclick="toggleHistoryView()" id="aiHistoryBtn" title="Lihat Riwayat Chat">
                 <i class="fas fa-history" id="aiHistoryBtnIcon"></i>
             </button>
-            <!-- Tombol Layar Penuh -->
-            <a href="{{ route('ai.chat.page') }}?fullscreen=1" class="ai-icon-btn" title="Buka Layar Penuh">
-                <i class="fas fa-expand-alt"></i>
-            </a>
             <!-- Tombol Tutup -->
             <button type="button" class="ai-icon-btn ai-close-btn" onclick="toggleAiDrawer(false)" title="Tutup Panel">
                 <i class="fas fa-times"></i>
@@ -185,13 +183,18 @@
     }
 
     /* ===== RIGHT-SIDE AI DRAWER PANEL ===== */
+    :root {
+        --ai-drawer-width: 420px;
+    }
+
     .ai-drawer {
         position: fixed;
         top: 0;
         bottom: 0;
         right: 0;
         left: auto;
-        width: 420px;
+        width: var(--ai-drawer-width, 420px);
+        max-width: calc(100vw - 72px);
         background: #ffffff;
         z-index: 1050;
         display: flex;
@@ -201,7 +204,53 @@
         transform: translateX(100%);
         opacity: 0;
         pointer-events: none;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, width 0.18s ease;
+    }
+
+    .ai-drawer-resizer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 8px;
+        cursor: ew-resize;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s ease;
+    }
+
+    .ai-drawer-resizer::after {
+        content: '';
+        width: 3px;
+        height: 44px;
+        border-radius: 999px;
+        background: rgba(5, 150, 105, 0.35);
+        opacity: 0;
+        transition: opacity 0.15s ease, background 0.15s ease;
+    }
+
+    .ai-drawer-resizer:hover,
+    body.ai-drawer-resizing .ai-drawer-resizer {
+        background: rgba(5, 150, 105, 0.08);
+    }
+
+    .ai-drawer-resizer:hover::after,
+    body.ai-drawer-resizing .ai-drawer-resizer::after {
+        opacity: 1;
+        background: #059669;
+    }
+
+    body.ai-drawer-resizing,
+    body.ai-drawer-resizing * {
+        cursor: ew-resize !important;
+        user-select: none !important;
+    }
+
+    body.ai-drawer-resizing .ai-drawer,
+    body.ai-drawer-resizing .admin-main {
+        transition: none !important;
     }
 
     .ai-drawer.open {
@@ -313,7 +362,7 @@
     /* Push admin-main on desktop/laptop (>= 1200px) */
     @media (min-width: 1200px) {
         body.ai-drawer-open .admin-main {
-            margin-right: 420px !important;
+            margin-right: var(--ai-drawer-width, 420px) !important;
         }
     }
 
@@ -453,7 +502,8 @@
     .ai-msg {
         display: flex;
         gap: 8px;
-        max-width: 90%;
+        max-width: 94%;
+        min-width: 0;
         animation: aiFadeIn 0.2s ease-out;
     }
 
@@ -500,6 +550,8 @@
         font-size: 0.84rem;
         line-height: 1.55;
         word-break: break-word;
+        min-width: 0;
+        max-width: 100%;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
@@ -885,7 +937,8 @@
         .ai-drawer {
             right: 0;
             left: auto;
-            width: min(390px, 92vw);
+            width: min(var(--ai-drawer-width, 390px), 92vw);
+            max-width: 95vw;
             z-index: 1001;
         }
 
@@ -920,9 +973,12 @@
     }
 </style>
 
+@include('components.ai-markdown-support')
+
 <script>
     (function() {
         const drawer = document.getElementById('aiDrawer');
+        const resizer = document.getElementById('aiDrawerResizer');
         const backdrop = document.getElementById('aiDrawerBackdrop');
         const chatView = document.getElementById('aiChatView');
         const historyView = document.getElementById('aiHistoryView');
@@ -934,17 +990,14 @@
         const messageInput = document.getElementById('aiMessageInput');
         const sendBtn = document.getElementById('aiSendBtn');
         const headerTitle = document.getElementById('aiHeaderTitle');
-        const floatingBtn = document.getElementById('aiFloatingBtn');
         
         let rawMessages = [];
-        let historyLoaded = false;
         let isViewingHistory = false;
 
         function createNewSessionId() {
             return 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
         }
         let currentSessionId = createNewSessionId();
-        let activeSessionMessagesCount = 0;
 
         // Auto-expand textarea
         messageInput.addEventListener('input', function() {
@@ -964,7 +1017,6 @@
         function showWelcomeGreeting() {
             chatBox.innerHTML = '';
             currentSessionId = createNewSessionId();
-            activeSessionMessagesCount = 0;
             appendAiMessage(
                 'Halo {{ auth()->user()?->name ?? 'Admin' }}! 👋 Saya **PharmAI**, asisten pintar **APOTEK ITU TOKO OBAT**.\n\nAda keluhan kesehatan, luka, rasa sakit, aturan pakai obat, atau stok apotek yang bisa saya bantu hari ini? 😊',
                 'bot'
@@ -1000,32 +1052,8 @@
             }
         }
 
-        // Format Markdown sederhana untuk bubble bot
-        function formatMarkdown(text) {
-            if (!text) return '';
-            let s = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            // Horizontal rule ---
-            s = s.replace(/^\s*-{3,}\s*$/gm, '<hr style="border:none;border-top:1px solid rgba(0,0,0,0.1);margin:8px 0;">');
-            // Headings ### or ##
-            s = s.replace(/^###\s+(.+)$/gm, '<div style="font-weight:700;font-size:0.95rem;margin:8px 0 4px;">$1</div>');
-            s = s.replace(/^##\s+(.+)$/gm, '<div style="font-weight:800;font-size:1rem;margin:8px 0 4px;">$1</div>');
-            // Inline code `code`
-            s = s.replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:0.85em;">$1</code>');
-            // Bullet list (* or -) at line start -> clean bullet dot (before *italic* parsing)
-            s = s.replace(/^\s*[-*]\s+/gm, '• ');
-            // Bold **text**
-            s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Italic *text*
-            s = s.replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
-            // Line break
-            s = s.replace(/\n/g, '<br>');
-
-            return s;
-        }
+        const formatMarkdown = window.PharmAIMarkdown.formatMarkdown;
+        const streamReplyToBubble = window.PharmAIMarkdown.streamReplyToBubble;
 
         function escapeHtml(text) {
             if (!text) return '';
@@ -1079,7 +1107,6 @@
 
                 const data = await response.json();
                 rawMessages = data.messages || [];
-                historyLoaded = true;
 
                 if (isViewingHistory) {
                     const searchVal = document.getElementById('aiHistorySearchInput')?.value || '';
@@ -1365,7 +1392,6 @@
 
             if (sess && sess.messages.length > 0) {
                 currentSessionId = sess.session_id;
-                activeSessionMessagesCount = sess.messages.length;
 
                 const banner = document.createElement('div');
                 banner.style.textAlign = 'center';
@@ -1566,54 +1592,6 @@
             }
         }
 
-        // Efek streaming teks bertahap (word-by-word) seperti ChatGPT / Gemini / Claude
-        function streamReplyToBubble(bubble, fullText, scrollEl) {
-            return new Promise((resolve) => {
-                if (!fullText) {
-                    bubble.innerHTML = '';
-                    resolve();
-                    return;
-                }
-
-                const tokens = fullText.split(/(\s+)/);
-                let currentIndex = 0;
-                let accumulated = '';
-                const totalTokens = tokens.length;
-                const step = totalTokens > 160 ? 3 : (totalTokens > 80 ? 2 : 1);
-                const intervalMs = 22;
-
-                function tick() {
-                    if (currentIndex >= totalTokens) {
-                        bubble.innerHTML = formatMarkdown(fullText);
-                        if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
-                        resolve();
-                        return;
-                    }
-
-                    const end = Math.min(currentIndex + step, totalTokens);
-                    for (let i = currentIndex; i < end; i++) {
-                        accumulated += tokens[i];
-                    }
-                    currentIndex = end;
-
-                    let preview = accumulated;
-                    const boldMatches = preview.match(/\*\*/g);
-                    if (boldMatches && boldMatches.length % 2 !== 0) {
-                        preview += '**';
-                    }
-
-                    bubble.innerHTML = formatMarkdown(preview) + '<span class="ai-stream-cursor"></span>';
-                    if (scrollEl) {
-                        scrollEl.scrollTop = scrollEl.scrollHeight;
-                    }
-
-                    setTimeout(tick, intervalMs);
-                }
-
-                tick();
-            });
-        }
-
         // Submit Message Form
         async function handleAiChatSubmit(event) {
             event.preventDefault();
@@ -1661,7 +1639,6 @@
                 const nowIso = new Date().toISOString();
                 rawMessages.push({ role: 'user', content: message, session_id: currentSessionId, created_at: nowIso });
                 rawMessages.push({ role: 'assistant', content: replyText, session_id: currentSessionId, created_at: nowIso });
-                activeSessionMessagesCount += 2;
 
                 await streamReplyToBubble(thinkingBubble, replyText, chatBox);
             } catch (error) {
@@ -1672,6 +1649,73 @@
                 messageInput.focus();
             }
         }
+
+        // Drag-to-scroll horizontal untuk tabel di dalam chatBox
+        window.PharmAIMarkdown.bindTableDragScroll(chatBox);
+
+        // Resize panel PharmAI (geser sisi kiri ke kiri untuk memperlebar, ke kanan untuk mengecilkan)
+        (function initDrawerResizer() {
+            const DEFAULT_WIDTH = 420;
+            const MIN_WIDTH = 340;
+            const applyDrawerWidth = (w) => {
+                const maxAllowed = Math.max(MIN_WIDTH, Math.min(1100, window.innerWidth - 88));
+                const clamped = Math.round(Math.max(MIN_WIDTH, Math.min(maxAllowed, w)));
+                document.documentElement.style.setProperty('--ai-drawer-width', clamped + 'px');
+                return clamped;
+            };
+
+            const savedWidth = parseInt(localStorage.getItem('ai_drawer_width') || '', 10);
+            if (!isNaN(savedWidth) && savedWidth >= MIN_WIDTH) {
+                applyDrawerWidth(savedWidth);
+            }
+
+            if (!resizer) return;
+            let isResizing = false;
+
+            const onPointerMove = (clientX) => {
+                if (!isResizing) return;
+                const width = applyDrawerWidth(window.innerWidth - clientX);
+                localStorage.setItem('ai_drawer_width', String(width));
+            };
+
+            resizer.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                isResizing = true;
+                document.body.classList.add('ai-drawer-resizing');
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                onPointerMove(e.clientX);
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.classList.remove('ai-drawer-resizing');
+            });
+
+            resizer.addEventListener('touchstart', () => {
+                isResizing = true;
+                document.body.classList.add('ai-drawer-resizing');
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isResizing || !e.touches[0]) return;
+                onPointerMove(e.touches[0].clientX);
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => {
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.classList.remove('ai-drawer-resizing');
+            });
+
+            resizer.addEventListener('dblclick', () => {
+                const resetW = applyDrawerWidth(DEFAULT_WIDTH);
+                localStorage.setItem('ai_drawer_width', String(resetW));
+            });
+        })();
 
         // Expose functions globally to window
         window.toggleAiDrawer = toggleAiDrawer;
@@ -1684,9 +1728,8 @@
         window.handleAiChatSubmit = handleAiChatSubmit;
         window.openHistorySession = openHistorySession;
 
-        // Auto open if parameter ?open_ai=1 is present or previously opened
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('open_ai') === '1' || sessionStorage.getItem('ai_drawer_open') === 'true') {
+        // Auto open if previously opened
+        if (sessionStorage.getItem('ai_drawer_open') === 'true') {
             toggleAiDrawer(true);
         }
     })();
