@@ -17,7 +17,7 @@
         <button onclick="toggleImportModal(true)" class="btn btn-outline" style="border-color:var(--accent-1); color:var(--accent-1); background:var(--accent-4);">
             <i class="fas fa-file-excel"></i> Import Excel
         </button>
-        <a href="{{ route('admin.obat.create') }}" class="btn btn-primary">
+        <a href="{{ route('admin.obat.create') }}" class="btn btn-primary js-obat-modal" data-modal-title="Tambah Obat Baru" data-modal-icon="fas fa-plus-circle">
             <i class="fas fa-plus"></i> Tambah Obat Baru
         </a>
     </div>
@@ -121,9 +121,9 @@
                     <td>
                         <div class="action-group">
                             @if($obat->is_approved)
-                                <a href="{{ route('admin.obat.show', $obat) }}" class="btn-icon btn-icon-blue" title="Lihat Detail"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('admin.obat.show', $obat) }}" class="btn-icon btn-icon-blue js-obat-modal" data-modal-title="Detail Obat" data-modal-icon="fas fa-eye" title="Lihat Detail"><i class="fas fa-eye"></i></a>
                                 @if($obat->is_active)
-                                <a href="{{ route('admin.obat.edit', $obat) }}" class="btn-icon btn-icon-amber" title="Edit"><i class="fas fa-edit"></i></a>
+                                <a href="{{ route('admin.obat.edit', $obat) }}" class="btn-icon btn-icon-amber js-obat-modal" data-modal-title="Edit: {{ $obat->nama_obat }}" data-modal-icon="fas fa-edit" title="Edit"><i class="fas fa-edit"></i></a>
                                 <form action="{{ route('admin.obat.destroy', $obat) }}" method="POST" onsubmit="return confirm('Hapus obat ini secara permanen?')">
                                     @csrf @method('DELETE')
                                     <button class="btn-icon btn-icon-red" title="Hapus"><i class="fas fa-trash"></i></button>
@@ -142,7 +142,7 @@
                             <div class="empty-icon"><i class="fas fa-pills"></i></div>
                             <h4>Belum ada data obat</h4>
                             <p>Mulai tambahkan obat ke inventaris apotek Anda</p>
-                            <a href="{{ route('admin.obat.create') }}" class="btn btn-primary btn-sm" style="margin-top:0.75rem;"><i class="fas fa-plus"></i> Tambah Obat</a>
+                            <a href="{{ route('admin.obat.create') }}" class="btn btn-primary btn-sm js-obat-modal" data-modal-title="Tambah Obat Baru" data-modal-icon="fas fa-plus-circle" style="margin-top:0.75rem;"><i class="fas fa-plus"></i> Tambah Obat</a>
                         </div>
                     </td>
                 </tr>
@@ -232,4 +232,6 @@ function setSortAndSubmit(column, direction) {
     document.getElementById('filter-form').submit();
 }
 </script>
+
+@include('components.obat-crud-modal')
 @endsection

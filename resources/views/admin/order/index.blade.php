@@ -74,7 +74,7 @@
                 @php $sc=['pending'=>'warning','dikonfirmasi'=>'primary','diproses'=>'primary','dikirim'=>'primary','selesai'=>'success','dibatalkan'=>'danger']; @endphp
                 <tr>
                     <td>
-                        <a href="{{ route('admin.orders.show', $order) }}" class="no-order-link">{{ $order->no_order }}</a>
+                        <a href="{{ route('admin.orders.show', $order) }}" class="no-order-link js-order-modal" data-order-no="{{ $order->no_order }}">{{ $order->no_order }}</a>
                         <div style="font-size:0.72rem;color:var(--gray-400);margin-top:1px;">{{ $order->items->count() ?? 0 }} item</div>
                     </td>
                     <td>
@@ -97,7 +97,7 @@
                         <div style="font-size:0.72rem;color:var(--gray-400);">{{ $order->created_at->format('H:i') }}</div>
                     </td>
                     <td>
-                        <a href="{{ route('admin.orders.show', $order) }}" class="btn-icon btn-icon-blue" title="Lihat Detail"><i class="fas fa-eye"></i></a>
+                        <a href="{{ route('admin.orders.show', $order) }}" class="btn-icon btn-icon-blue js-order-modal" data-order-no="{{ $order->no_order }}" title="Lihat Detail"><i class="fas fa-eye"></i></a>
                     </td>
                 </tr>
                 @empty
@@ -119,4 +119,6 @@
     </div>
     @endif
 </div>
+
+@include('components.order-detail-modal')
 @endsection

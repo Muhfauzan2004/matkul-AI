@@ -77,9 +77,17 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.index')->with('success', 'Catatan penjualan berhasil ditambahkan.');
     }
 
-    public function show(Order $order)
+    public function show(Request $request, Order $order)
     {
-        $order->load('user', 'items.obat');
+        $order->load('user', 'items.obat.kategori');
+
+        if ($request->boolean('modal') || $request->ajax()) {
+            return view('admin.order._detail_content', [
+                'order' => $order,
+                'isModal' => true,
+            ]);
+        }
+
         return view('admin.order.show', compact('order'));
     }
 

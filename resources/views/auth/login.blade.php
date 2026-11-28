@@ -15,7 +15,7 @@
     <div class="login-container">
         <div class="login-brand">
             <div class="login-brand-icon">
-                <i class="fas fa-mortar-pestle"></i>
+                <x-pharmacy-logo class="auth-brand-logo" />
             </div>
             <h1>APOTEK ITU <span>TOKO OBAT</span></h1>
             <p>Sistem Manajemen Farmasi & Layanan PharmAI Terpadu</p>

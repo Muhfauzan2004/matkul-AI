@@ -97,14 +97,24 @@
             letter-spacing: -0.01em;
         }
 
+        .sidebar-brand i,
+        .sidebar-brand .sidebar-brand-logo {
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.4));
+        }
+
         .sidebar-brand i {
             background: linear-gradient(135deg, #34d399 0%, #a7f3d0 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 1.45rem;
-            flex-shrink: 0;
-            filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.4));
+        }
+
+        .sidebar-brand .sidebar-brand-logo {
+            width: 46px;
+            height: 46px;
+            display: block;
         }
 
         .sidebar-nav {
@@ -163,14 +173,71 @@
         .sidebar-link i { width: 20px; text-align: center; font-size: 0.95rem; }
 
         .sidebar-footer {
-            padding: 1rem;
+            padding: 0.85rem;
             border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: auto;
         }
+        .sidebar-profile-dropdown { width: 100%; }
+        .sidebar-profile-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.6rem 0.7rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: #ffffff;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        .sidebar-profile-btn:hover { background: rgba(255, 255, 255, 0.14); }
+        .sidebar-profile-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .sidebar-profile-info { flex: 1; min-width: 0; }
+        .sidebar-profile-name {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-profile-role {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #6ee7b7;
+            text-transform: capitalize;
+        }
+        .sidebar-profile-chevron { font-size: 0.7rem; color: rgba(255, 255, 255, 0.65); flex-shrink: 0; }
+        .sidebar-profile-menu {
+            top: auto !important;
+            bottom: calc(100% + 0.5rem);
+            left: 0;
+            right: 0;
+            min-width: 100%;
+        }
+        .sidebar-profile-menu::before { top: auto; bottom: -0.6rem; }
 
         /* ===== MAIN AREA ===== */
         .admin-main {
             margin-left: var(--sidebar-width);
             flex: 1;
+            min-width: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -182,8 +249,8 @@
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(226, 232, 240, 0.85);
             padding: 0 2rem;
-            height: 66px;
-            display: flex;
+            height: 60px;
+            display: none;
             align-items: center;
             justify-content: space-between;
             position: sticky;
@@ -193,8 +260,8 @@
         }
 
         .admin-topbar h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.45rem;
+            font-weight: 800;
             color: var(--dark);
             letter-spacing: -0.02em;
         }
@@ -288,7 +355,8 @@
         .dropdown { position: relative; }
         .dropdown-menu { position: absolute; right: 0; top: calc(100% + 0.5rem); background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 0.5rem; min-width: 180px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); display: none; z-index: 200; }
         .dropdown-menu::before { content: ''; position: absolute; top: -0.6rem; left: 0; right: 0; height: 0.6rem; background: transparent; }
-        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown:hover .dropdown-menu,
+        .dropdown.open .dropdown-menu { display: block; }
         .dropdown-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; text-decoration: none; color: var(--gray-600); font-size: 0.85rem; border-radius: var(--radius-sm); transition: var(--transition); }
         .dropdown-item:hover { background: var(--gray-100); color: var(--gray-800); }
         .dropdown-divider { height: 1px; background: var(--gray-200); margin: 0.25rem 0; }
@@ -296,11 +364,72 @@
         .form-inline { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
         .form-inline .form-control { width: auto; min-width: 200px; }
 
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .admin-main { margin-left: 0; }
+        .admin-topbar-left { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            background: var(--white);
+            color: var(--gray-700);
+            font-size: 1.05rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        .mobile-menu-btn:hover { background: var(--gray-100); color: var(--primary); }
+        .sidebar-close-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.08);
+            color: #ffffff;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 44, 34, 0.48);
+            z-index: 1015;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-backdrop.active { display: block; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 1020;
+                width: var(--sidebar-width) !important;
+            }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+            .sidebar-close-btn { display: inline-flex; }
+            .mobile-menu-btn { display: inline-flex; }
+            .admin-main { margin-left: 0 !important; width: 100%; }
+            .admin-topbar { display: flex; padding: 0 1rem; height: 60px; }
+            .admin-topbar h1 { font-size: 1.08rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .admin-content { padding: 1rem; }
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .admin-content { padding: 0.85rem; }
+            .card-header { padding: 0.9rem 1rem; flex-wrap: wrap; gap: 0.65rem; }
+            .card-body { padding: 1rem; overflow-x: auto; }
+            .form-inline .form-control { width: 100%; min-width: 0; flex: 1 1 100%; }
+            .pagination { flex-wrap: wrap; }
+            .admin-topbar-actions .badge { display: none; }
         }
 
         .premium-swal-popup {
@@ -315,12 +444,15 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <a href="{{ auth()->user()->isSuperAdmin() ? route('admin.user.index') : route('admin.dashboard') }}" class="sidebar-brand">
-                <i class="fas fa-mortar-pestle"></i>
+                <x-pharmacy-logo class="sidebar-brand-logo" />
                 <span class="sidebar-brand-text">
                     APOTEK ITU TOKO OBAT
                     <small style="display:block;font-size:0.62rem;font-weight:600;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;">{{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Admin Panel' }}</small>
                 </span>
             </a>
+            <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Tutup Menu">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <nav class="sidebar-nav">
@@ -382,33 +514,22 @@
             </a>
             @endif
         </nav>
+
+        @include('components.sidebar-profile', [
+            'profileRoute' => 'admin.profile.edit',
+            'roleLabel' => str_replace('_', ' ', auth()->user()->role),
+        ])
     </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     {{-- MAIN --}}
     <main class="admin-main">
         <div class="admin-topbar">
-            <h1>@yield('title', 'Dashboard')</h1>
-            <div class="admin-topbar-actions">
-                <div class="dropdown">
-                    <span style="font-size:0.85rem;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:0.4rem;padding:0.35rem 0.75rem;border-radius:var(--radius-sm);transition:var(--transition);background:var(--gray-50);border:1px solid var(--gray-200);">
-                        <i class="fas fa-user-circle" style="font-size:1.1rem;color:var(--primary);"></i>
-                        <strong>{{ auth()->user()->name }}</strong>
-                        <span class="badge badge-primary" style="font-size:0.65rem;">{{ str_replace('_', ' ', auth()->user()->role) }}</span>
-                        <i class="fas fa-chevron-down" style="font-size:0.65rem;color:var(--gray-500);"></i>
-                    </span>
-                    <div class="dropdown-menu">
-                        <a href="{{ route('admin.profile.edit') }}" class="dropdown-item">
-                            <i class="fas fa-user-edit" style="color:var(--primary);"></i> Edit Profil
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-                            @csrf
-                            <button type="submit" class="dropdown-item w-full" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:inherit;text-align:left;width:100%">
-                                <i class="fas fa-sign-out-alt" style="color:var(--danger);"></i> Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
+            <div class="admin-topbar-left">
+                <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Buka Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>@yield('title', 'APOTEK ITU TOKO OBAT')</h1>
             </div>
         </div>
 
@@ -612,6 +733,7 @@
     </script>
 
     @stack('scripts')
+    @include('components.mobile-nav-script')
 
     @if(auth()->check() && !auth()->user()->isSuperAdmin())
         @include('components.ai-button')

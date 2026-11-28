@@ -301,6 +301,12 @@
             margin: 0 !important;
         }
 
+        body.ai-drawer-open .sidebar-brand .sidebar-brand-logo {
+            width: 40px !important;
+            height: 40px !important;
+            margin: 0 !important;
+        }
+
         body.ai-drawer-open .sidebar-brand-text,
         body.ai-drawer-open .sidebar-brand span:not(.sidebar-badge) {
             display: none !important;
@@ -970,6 +976,14 @@
     @keyframes aiCursorBlink {
         0%, 100% { opacity: 1; }
         50% { opacity: 0; }
+    }
+
+    @media print {
+        .ai-floating-button,
+        .ai-drawer,
+        .ai-drawer-backdrop {
+            display: none !important;
+        }
     }
 </style>
 

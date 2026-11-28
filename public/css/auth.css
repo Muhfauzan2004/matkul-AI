@@ -63,25 +63,27 @@ body {
 }
 
 .login-brand-icon, .register-brand-icon {
-    width: 62px;
-    height: 62px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border-radius: 18px;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
     color: white;
     margin-bottom: 0.75rem;
-    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    animation: pulse-glow 3s infinite;
+    filter: drop-shadow(0 8px 22px rgba(16, 185, 129, 0.35));
 }
-.register-brand-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    font-size: 1.45rem;
+.login-brand-icon .auth-brand-logo {
+    width: 92px;
+    height: 92px;
+    display: block;
+}
+.register-brand-icon .auth-brand-logo {
+    width: 82px;
+    height: 82px;
+    display: block;
 }
 
 @keyframes pulse-glow {

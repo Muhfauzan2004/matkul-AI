@@ -55,9 +55,6 @@ class ObatController extends Controller
             return redirect()->route('pemilik.obat.index')->with('error', 'Obat sudah disetujui, tidak dapat ditolak.');
         }
 
-        if ($obat->gambar) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($obat->gambar);
-        }
         $obat->delete();
 
         return redirect()->route('pemilik.obat.index')->with('success', 'Usulan obat baru berhasil ditolak.');

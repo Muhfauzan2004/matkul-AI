@@ -26,6 +26,9 @@
             @endif
         </div>
     </div>
+    <div class="greeting-emblem" aria-hidden="true" title="Apotek Itu Toko Obat">
+        <x-pharmacy-logo />
+    </div>
 </div>
 
 {{-- PERBANDINGAN PENJUALAN BULANAN (MONTHLY SALES COMPARISON) --}}
@@ -204,7 +207,7 @@
             @php $sc=['pending'=>'warning','dikonfirmasi'=>'primary','diproses'=>'primary','dikirim'=>'primary','selesai'=>'success','dibatalkan'=>'danger']; @endphp
             <div class="order-row">
                 <div>
-                    <a href="{{ route('admin.orders.show', $order) }}" class="order-no">{{ $order->no_order }}</a>
+                    <a href="{{ route('admin.orders.show', $order) }}" class="order-no js-order-modal" data-order-no="{{ $order->no_order }}">{{ $order->no_order }}</a>
                     <div class="order-user"><i class="fas fa-user" style="font-size:0.65rem;"></i> {{ $order->user->name ?? 'Penjualan Manual' }}</div>
                 </div>
                 <div style="text-align:center;">
@@ -274,3 +277,5 @@
     </div>
 </div>
 @endsection
+
+@include('components.order-detail-modal')

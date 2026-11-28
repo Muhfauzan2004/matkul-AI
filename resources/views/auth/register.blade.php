@@ -15,7 +15,7 @@
     <div class="register-container">
         <div class="register-brand">
             <div class="register-brand-icon">
-                <i class="fas fa-mortar-pestle"></i>
+                <x-pharmacy-logo class="auth-brand-logo" />
             </div>
             <h1>APOTEK ITU <span>TOKO OBAT</span></h1>
             <p>Registrasi Staf & Operasional Farmasi</p>

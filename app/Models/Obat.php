@@ -21,7 +21,6 @@ class Obat extends Model
         'harga_barang',
         'harga_jual_bpjs',
         'deskripsi',
-        'gambar',
         'is_active',
         'is_approved',
     ];

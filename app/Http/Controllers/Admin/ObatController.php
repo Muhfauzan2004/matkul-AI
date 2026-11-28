@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Obat;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ObatController extends Controller
 {
@@ -49,9 +48,14 @@ class ObatController extends Controller
 
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $kategoris = Kategori::orderBy('nama_kategori')->get();
+
+        if ($request->boolean('modal') || $request->ajax()) {
+            return view('admin.obat._form', ['kategoris' => $kategoris, 'isModal' => true]);
+        }
+
         return view('admin.obat.create', compact('kategoris'));
     }
 
@@ -66,15 +70,10 @@ class ObatController extends Controller
             'harga_barang' => 'required|numeric|min:0',
             'harga_jual_bpjs' => 'required|integer|min:0',
             'deskripsi' => 'nullable|string',
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'is_active' => 'boolean',
         ]);
 
         $validated['kode'] = Obat::generateKodeObat();
-
-        if ($request->hasFile('gambar')) {
-            $validated['gambar'] = $request->file('gambar')->store('obat', 'public');
-        }
 
         $validated['is_approved'] = auth()->user()->isSuperAdmin() ? true : false;
         
@@ -89,24 +88,43 @@ class ObatController extends Controller
         return redirect()->route('admin.obat.index')->with('success', 'Obat berhasil ditambahkan.');
     }
 
-    public function show(Obat $obat)
+    public function show(Request $request, Obat $obat)
     {
         if (!$obat->is_approved) {
+            if ($request->boolean('modal') || $request->ajax()) {
+                return response('<div class="alert alert-error">Obat yang masih pending tidak dapat dilihat.</div>', 422);
+            }
             return redirect()->route('admin.obat.index')->with('error', 'Obat yang masih pending tidak dapat dilihat.');
         }
         $obat->load('kategori');
+
+        if ($request->boolean('modal') || $request->ajax()) {
+            return view('admin.obat._detail', compact('obat'));
+        }
+
         return view('admin.obat.show', compact('obat'));
     }
 
-    public function edit(Obat $obat)
+    public function edit(Request $request, Obat $obat)
     {
         if (!$obat->is_approved) {
+            if ($request->boolean('modal') || $request->ajax()) {
+                return response('<div class="alert alert-error">Obat yang masih pending tidak dapat diubah.</div>', 422);
+            }
             return redirect()->route('admin.obat.index')->with('error', 'Obat yang masih pending tidak dapat diubah.');
         }
         if (!$obat->is_active) {
+            if ($request->boolean('modal') || $request->ajax()) {
+                return response('<div class="alert alert-error">Obat yang tidak aktif tidak dapat diubah.</div>', 422);
+            }
             return redirect()->route('admin.obat.index')->with('error', 'Obat yang tidak aktif tidak dapat diubah.');
         }
         $kategoris = Kategori::orderBy('nama_kategori')->get();
+
+        if ($request->boolean('modal') || $request->ajax()) {
+            return view('admin.obat._form', ['obat' => $obat, 'kategoris' => $kategoris, 'isModal' => true]);
+        }
+
         return view('admin.obat.edit', compact('obat', 'kategoris'));
     }
 
@@ -128,16 +146,8 @@ class ObatController extends Controller
             'harga_barang' => 'required|numeric|min:0',
             'harga_jual_bpjs' => 'required|integer|min:0',
             'deskripsi' => 'nullable|string',
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'is_active' => 'boolean',
         ]);
-
-        if ($request->hasFile('gambar')) {
-            if ($obat->gambar) {
-                Storage::disk('public')->delete($obat->gambar);
-            }
-            $validated['gambar'] = $request->file('gambar')->store('obat', 'public');
-        }
 
         if (!$obat->is_approved) {
             $validated['is_active'] = false;
@@ -161,9 +171,6 @@ class ObatController extends Controller
             return redirect()->route('admin.obat.index')->with('error', 'Obat yang tidak aktif tidak dapat dihapus.');
         }
 
-        if ($obat->gambar) {
-            Storage::disk('public')->delete($obat->gambar);
-        }
         $obat->delete();
 
         return redirect()->route('admin.obat.index')->with('success', 'Obat berhasil dihapus.');

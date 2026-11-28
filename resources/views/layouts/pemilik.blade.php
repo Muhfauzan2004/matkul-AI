@@ -17,12 +17,15 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <a href="{{ route('pemilik.dashboard') }}" class="sidebar-brand">
-                <i class="fas fa-mortar-pestle"></i>
+                <x-pharmacy-logo class="sidebar-brand-logo" />
                 <span class="sidebar-brand-text">
                     APOTEK ITU TOKO OBAT
                     <small style="display:block;font-size:0.62rem;font-weight:600;color:#6ee7b7;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;">Panel Pemilik</small>
                 </span>
             </a>
+            <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Tutup Menu">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         <nav class="sidebar-nav">
             <div class="sidebar-label">Utama</div>
@@ -65,32 +68,21 @@
                 <span class="sidebar-link-text">Kelola Admin</span>
             </a>
         </nav>
+
+        @include('components.sidebar-profile', [
+            'profileRoute' => 'pemilik.profile.edit',
+            'roleLabel' => 'Pemilik',
+        ])
     </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <main class="admin-main">
         <div class="admin-topbar">
-            <h1>@yield('title', 'Dashboard')</h1>
-            <div class="admin-topbar-actions">
-                <div class="dropdown">
-                    <span class="dropdown-trigger">
-                        <i class="fas fa-user-circle" style="font-size:1.15rem;color:var(--primary);"></i>
-                        <strong>{{ auth()->user()->name }}</strong>
-                        <span class="badge badge-primary" style="font-size:0.65rem;">Pemilik</span>
-                        <i class="fas fa-chevron-down" style="font-size:0.65rem;color:var(--gray-500);"></i>
-                    </span>
-                    <div class="dropdown-menu">
-                        <a href="{{ route('pemilik.profile.edit') }}" class="dropdown-item">
-                            <i class="fas fa-user-edit" style="color:var(--primary);"></i> Edit Profil
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-                            @csrf
-                            <button type="submit" class="dropdown-item" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:inherit;text-align:left;width:100%">
-                                <i class="fas fa-sign-out-alt" style="color:var(--danger);"></i> Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
+            <div class="admin-topbar-left">
+                <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Buka Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>@yield('title', 'APOTEK ITU TOKO OBAT')</h1>
             </div>
         </div>
 
@@ -294,6 +286,7 @@
     </script>
     
     @stack('scripts')
+    @include('components.mobile-nav-script')
 
     @if(auth()->check())
         @include('components.ai-button')

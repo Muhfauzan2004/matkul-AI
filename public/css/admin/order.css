@@ -364,14 +364,20 @@
 }
 
 .invoice-brand-icon {
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.15);
+    width: 46px;
+    height: 46px;
+    background: transparent;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.invoice-brand-logo {
+    width: 46px;
+    height: 46px;
+    display: block;
 }
 
 .invoice-brand-name {
@@ -585,7 +591,10 @@
 
     .no-print,
     .sidebar,
-    .admin-topbar {
+    .admin-topbar,
+    .ai-floating-button,
+    .ai-drawer,
+    .ai-drawer-backdrop {
         display: none !important;
     }
 
@@ -604,5 +613,9 @@
     .invoice-card {
         box-shadow: none;
         border: 1px solid #ccc;
+    }
+
+    .invoice-brand-logo {
+        filter: brightness(0) saturate(100%) invert(24%) sepia(61%) saturate(1352%) hue-rotate(138deg) brightness(93%) contrast(96%);
     }
 }
