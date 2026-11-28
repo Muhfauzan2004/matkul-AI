@@ -26,6 +26,9 @@
             @endif
         </div>
     </div>
+    <div class="greeting-emblem" aria-hidden="true" title="Apotek Itu Toko Obat">
+        <x-pharmacy-logo />
+    </div>
 </div>
 
 {{-- PENDING ACTION BANNER --}}
